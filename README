@@ -2,10 +2,12 @@ Just a simple dsl for criteria and hql with scala.
 
 Just some examples:
 
-1) session.from(classOf[User]).where("age" >= 20).and("name" like "alberto").asList[User]
+1)session.from(classOf[User]).orderBy("name".asc).orderBy("age".desc).asList[User]
 
-2) session.from(classOf[Address]).join("user").where("user.name" equal "alberto2").asList[Address]
+2) session.from(classOf[User]).where("age" >= 20).and("name" like "alberto").asList[User]
 
-3) session.from(classOf[Address]).join("user").where("user.name" equal "alberto2").and("user.age" >= 20).asList[Address]
+3) session.from(classOf[Address]).join("user").where("user.name" equal "alberto2").asList[Address]
 
-4) session.query("from User where name=:name and age =:age").withParams("name" -> "alberto","age" -> alberto.getAge).asList[User]
+4) session.from(classOf[Address]).join("user").where("user.name" equal "alberto2").and("user.age" >= 20).asList[Address]
+
+5) session.query("from User where name=:name and age =:age").withParams("name" -> "alberto","age" -> alberto.getAge).asList[User]
