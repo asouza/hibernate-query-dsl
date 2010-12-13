@@ -211,9 +211,25 @@ class PimpedClassTest {
         assertEquals(2,list size)		
 	}		
 	
+	@Test
+	def shouldExecuteJustASimpleHQL {
+		val alberto = newUser("alberto",10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",30)
+		val alberto4 = newUser("outrute",40)
+		val list = session.query("from User").asList[User]
+		assertEquals(4,list size)
+	}	
 	
-	
-	
+	@Test
+	def shouldAssingParametersForHQL {
+		val alberto = newUser("alberto",10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",30)
+		val alberto4 = newUser("outrute",40)
+		val list = session.query("from User where name=:name and age =:age").withParams("name" -> "alberto","age" -> alberto.getAge).asList[User]
+		assertEquals(1,list size)
+	}
 	
 	
 	

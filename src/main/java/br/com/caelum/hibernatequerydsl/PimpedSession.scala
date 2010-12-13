@@ -1,7 +1,7 @@
 package br.com.caelum.hibernatequerydsl
 
 import PimpedSession._
-import org.hibernate.{Criteria, Session}
+import org.hibernate.{Criteria, Session,Query}
 import org.hibernate.criterion.{Order, Criterion,Restrictions,MatchMode}
 import org.hibernate.criterion.Projections._
 
@@ -11,6 +11,22 @@ object PimpedSession {
   implicit def criteria2PimpedCriteria(criteria: Criteria) = new PimpedCriteria(criteria)
   
   implicit def string2PimpedStringCondition(field:String) = new PimpedStringCondition(field)
+  
+  implicit def hibernateQuery2PimpedQuery(query:Query) = new PimpedQuery(query)
+}
+
+
+class PimpedQuery(query:Query) {
+	def withParams(params:(String,Object)*) = {
+		params.foreach(param => {
+			query.setParameter(param._1 ,param._2)
+		})
+		query
+	}	
+	
+  def unique[T]: T = query.uniqueResult.asInstanceOf[T]
+
+  def asList[T]: java.util.List[T] = query.list.asInstanceOf[java.util.List[T]]	
 }
 
 class PimpedStringCondition(field:String) {
@@ -32,6 +48,8 @@ class PimpedSession(session: Session) {
   def all[T](klass: Class[T]) = session.createCriteria(klass).asList[T];
   
   def from(klass:Class[_]) = session.createCriteria(klass)
+  
+  def query(query:String) = session.createQuery(query)
  
   def count(klass:Class[_]) = session.createCriteria(klass).count
 
