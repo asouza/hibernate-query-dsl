@@ -82,6 +82,7 @@ class PimpedCriteria(criteria: Criteria) {
   
   def first[T] = criteria.setFirstResult(0).setMaxResults(1).unique[T]
 
+  //@TODO this is a shit impl...
   def last[T] = {
 	  val list = criteria.asList[T]	  	  
 	  list.get(list.size-1).asInstanceOf[T]	 	   

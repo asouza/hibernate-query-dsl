@@ -1,12 +1,11 @@
 package br.com.caelum.hibernatequerydsl
-
-import org.hibernate.criterion.Restrictions
 import br.com.caelum.hibernatequerydsl.PimpedSession._
 import org.hibernate.Session
 import org.hibernate.cfg.AnnotationConfiguration
 import org.hibernate.criterion.Order._
 import org.junit.{Test, Before, After}
 import org.junit.Assert._
+
 class PimpedClassTest {
 
 	private var session:Session = _
