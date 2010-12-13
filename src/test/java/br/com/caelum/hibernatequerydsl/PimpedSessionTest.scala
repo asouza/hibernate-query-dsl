@@ -85,7 +85,7 @@ class PimpedClassTest {
 	def shouldGetFirstBasedOnSomeField {
 		val alberto = newUser("alberto") 
 		val joao = newUser("joao")
-		val userRetrieved = session.from(classOf[User]).desc("name").first[User]
+		val userRetrieved = session.from(classOf[User]).orderBy("name".desc).first[User]
 		assertEquals(joao,userRetrieved)
 	}
 	
@@ -101,7 +101,7 @@ class PimpedClassTest {
 	def shouldGetTheLastDescOrderedOnSomeField {
 		val alberto = newUser("alberto") 
 		val joao = newUser("joao")
-		val userRetrieved = session.from(classOf[User]).desc("name").last[User]
+		val userRetrieved = session.from(classOf[User]).orderBy("name".desc).last[User]
 		assertEquals(alberto,userRetrieved)
 	}
 	
@@ -109,7 +109,7 @@ class PimpedClassTest {
 	def shouldGetTheLastDescOrderedOnSomeFields {
 		val alberto = newUser("alberto") 
 		val joao = newUser("joao")
-		val userRetrieved = session.from(classOf[User]).desc("name").last[User]
+		val userRetrieved = session.from(classOf[User]).orderBy("name".desc).last[User]
 		assertEquals(alberto,userRetrieved)
 	}	
 	
@@ -117,15 +117,15 @@ class PimpedClassTest {
 	def shouldGetTheLastAscOrderedOnSomeField {
 		val alberto = newUser("alberto") 
 		val joao = newUser("joao")
-		val userRetrieved = session.from(classOf[User]).asc("name").last[User]
+		val userRetrieved = session.from(classOf[User]).orderBy("name".asc).last[User]
 		assertEquals(joao,userRetrieved)
 	}
 	
 	@Test
-	def shouldGetTheLastAscOrderedOnSomeFields {
-		val alberto = newUser("alberto") 
-		val joao = newUser("joao")
-		val userRetrieved = session.from(classOf[User]).desc("name").last[User]
+	def shouldGetTheLastAscAndDescOrderedOnSomeFields {
+		val alberto = newUser("alberto",10) 
+		val alberto2 = newUser("alberto",20)
+		val userRetrieved = session.from(classOf[User]).orderBy("name".asc).orderBy("age".desc).last[User]
 		assertEquals(alberto,userRetrieved)
 	}	
 	

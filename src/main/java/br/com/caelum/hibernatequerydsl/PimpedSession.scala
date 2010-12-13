@@ -41,6 +41,10 @@ class PimpedStringCondition(field:String) {
 	def <=(value:Object) = Restrictions.le(field,value)
 
 	def like(value:String) = Restrictions.ilike(field,value,MatchMode.ANYWHERE)
+	
+	def desc = Order.desc(field)
+  
+    def asc = Order.asc(field)	
 }
 
 class PimpedSession(session: Session) {
@@ -65,10 +69,8 @@ class PimpedCriteria(criteria: Criteria) {
 
   def asList[T]: java.util.List[T] = criteria.list.asInstanceOf[java.util.List[T]]
   
-  def desc(property:String) = criteria.addOrder(Order.desc(property))
-  
-  def asc(property:String) = criteria.addOrder(Order.asc(property))
-  
+  def orderBy(order:Order) = criteria.addOrder(order)
+ 
   def join(property:String) = {
 	  criteria.createAlias(property,property)
 	  criteria

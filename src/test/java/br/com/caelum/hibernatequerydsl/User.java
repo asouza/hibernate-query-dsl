@@ -9,8 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
-import org.hibernate.criterion.MatchMode;
-
 @Entity
 public class User {
 	@Id
@@ -23,7 +21,7 @@ public class User {
 	
 	
 
-	public List<Address> getAddresses() {		
+	public List<Address> getAddresses() {
 		return addresses;
 	}
 
