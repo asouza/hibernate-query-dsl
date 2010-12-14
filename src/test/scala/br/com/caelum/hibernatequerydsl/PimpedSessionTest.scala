@@ -176,7 +176,7 @@ class PimpedClassTest {
 		val alberto2 = newUser("alberto2",20)
 		val alberto3 = newUser("alberto3",30)
 		val alberto4 = newUser("alberto4",40)
-		val list = session.from(classOf[User]).where("age" >= alberto.getAge).asList[User]
+		var list = session.from(classOf[User]).where("age" >= alberto.getAge).asList[User]
 	    assertEquals(4,list size)		
 	}		
 	
