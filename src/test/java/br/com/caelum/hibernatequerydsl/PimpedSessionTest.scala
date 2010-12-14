@@ -51,33 +51,33 @@ class PimpedClassTest {
 	def shouldListAllObjects {
 		newUser("alberto") 
 		newUser("alberto")
-		val users = session.all(classOf[User])
+		val users = session.all[User]
 		assertEquals(2,users size)		
 	}
 	
 	@Test
 	def shouldVerifyIfExists {
 		newUser("alberto") 
-		assertTrue(session.exists(classOf[User]))
+		assertTrue(session.exists[User])
 	}
 	
 	@Test
 	def shouldVerifyIfNotExists {
-		assertFalse(session.exists(classOf[User]))
+		assertFalse(session.exists[User])
 	}	
 	
 	@Test
 	def shouldCount {
 		newUser("alberto") 
 		newUser("alberto")
-		assertEquals(2,session.count(classOf[User]))
+		assertEquals(2,session.count[User])
 	}
 	
 	@Test
 	def shouldGetFirstBasedOnId {
 		val alberto = newUser("alberto") 
 		newUser("alberto2")
-		val userRetrieved = session.first(classOf[User])
+		val userRetrieved = session.first[User]
 		assertEquals(alberto,userRetrieved)
 	}
 	
@@ -85,7 +85,7 @@ class PimpedClassTest {
 	def shouldGetFirstBasedOnSomeField {
 		val alberto = newUser("alberto") 
 		val joao = newUser("joao")
-		val userRetrieved = session.from(classOf[User]).orderBy("name".desc).first[User]
+		val userRetrieved = session.from[User].orderBy("name".desc).first[User]
 		assertEquals(joao,userRetrieved)
 	}
 	
@@ -93,7 +93,7 @@ class PimpedClassTest {
 	def shouldGetTheLastBasedOnId {
 		val alberto = newUser("alberto") 
 		val joao = newUser("joao")
-		val userRetrieved = session.last(classOf[User])
+		val userRetrieved = session.last[User]
 		assertEquals(joao,userRetrieved)
 	}
 	
@@ -101,7 +101,7 @@ class PimpedClassTest {
 	def shouldGetTheLastDescOrderedOnSomeField {
 		val alberto = newUser("alberto") 
 		val joao = newUser("joao")
-		val userRetrieved = session.from(classOf[User]).orderBy("name".desc).last[User]
+		val userRetrieved = session.from[User].orderBy("name".desc).last[User]
 		assertEquals(alberto,userRetrieved)
 	}
 	
@@ -109,7 +109,7 @@ class PimpedClassTest {
 	def shouldGetTheLastDescOrderedOnSomeFields {
 		val alberto = newUser("alberto") 
 		val joao = newUser("joao")
-		val userRetrieved = session.from(classOf[User]).orderBy("name".desc).last[User]
+		val userRetrieved = session.from[User].orderBy("name".desc).last[User]		
 		assertEquals(alberto,userRetrieved)
 	}	
 	
@@ -117,7 +117,7 @@ class PimpedClassTest {
 	def shouldGetTheLastAscOrderedOnSomeField {
 		val alberto = newUser("alberto") 
 		val joao = newUser("joao")
-		val userRetrieved = session.from(classOf[User]).orderBy("name".asc).last[User]
+		val userRetrieved = session.from[User].orderBy("name".asc).last[User]
 		assertEquals(joao,userRetrieved)
 	}
 	
@@ -125,7 +125,7 @@ class PimpedClassTest {
 	def shouldGetTheLastAscAndDescOrderedOnSomeFields {
 		val alberto = newUser("alberto",10) 
 		val alberto2 = newUser("alberto",20)
-		val userRetrieved = session.from(classOf[User]).orderBy("name".asc).orderBy("age".desc).last[User]
+		val userRetrieved = session.from[User].orderBy("name".asc).orderBy("age".desc).last[User]
 		assertEquals(alberto,userRetrieved)
 	}	
 	
@@ -134,7 +134,7 @@ class PimpedClassTest {
 		val alberto = newUser("alberto")
 		val address = newAddress("rua da casa de nao sei quem",alberto)
 		val address2 = newAddress("rua da casa de nao sei quem",alberto)		
-		val list = session.from(classOf[Address]).join("user").asList[Address]
+		val list = session.from[Address].join("user").asList[Address]
 		assertEquals(2,list size)
 		
 	}
@@ -145,7 +145,7 @@ class PimpedClassTest {
 		val alberto2 = newUser("alberto2")
 		val address = newAddress("rua da casa de nao sei quem",alberto)
 		val address2 = newAddress("rua da casa de nao sei quem",alberto2)		
-		val list = session.from(classOf[Address]).join("user").where("user.name".equal("alberto2")).asList[Address]
+		val list = session.from[Address].join("user").where("user.name".equal("alberto2")).asList[Address]
 		assertEquals(1,list size)
 		
 	}
@@ -156,8 +156,13 @@ class PimpedClassTest {
 		val alberto2 = newUser("alberto2",20)
 		val address = newAddress("rua da casa de nao sei quem",alberto)
 		val address2 = newAddress("rua da casa de nao sei quem",alberto2)		
-		val list = session.from(classOf[Address]).join("user").where("user.name".equal("alberto2")).and("user.age".equal(alberto2.getAge)).asList[Address]
+		val list = session.from[Address].join("user").where("user.name".equal("alberto2")).and("user.age".equal(alberto2.getAge)).asList[Address]
 	    assertEquals(1,list size)		
+	}
+	
+	@Test
+	def shouldDoAJoinWithToManyAttribute {
+				
 	}
 	
 	@Test
@@ -166,7 +171,7 @@ class PimpedClassTest {
 		val alberto2 = newUser("alberto2",20)
 		val alberto3 = newUser("alberto3",30)
 		val alberto4 = newUser("alberto4",40)
-		val list = session.from(classOf[User]).where("age" > alberto.getAge).asList[User]
+		val list = session.from[User].where("age" > alberto.getAge).asList[User]
 	    assertEquals(3,list size)		
 	}
 	
@@ -176,7 +181,7 @@ class PimpedClassTest {
 		val alberto2 = newUser("alberto2",20)
 		val alberto3 = newUser("alberto3",30)
 		val alberto4 = newUser("alberto4",40)
-		val list = session.from(classOf[User]).where("age" >= alberto.getAge).asList[User]
+		val list = session.from[User].where("age" >= alberto.getAge).asList[User]
 	    assertEquals(4,list size)		
 	}		
 	
@@ -186,7 +191,7 @@ class PimpedClassTest {
 		val alberto2 = newUser("alberto2",20)
 		val alberto3 = newUser("alberto3",30)
 		val alberto4 = newUser("alberto4",40)
-		val list = session.from(classOf[User]).where("age" < alberto2.getAge).asList[User]
+		val list = session.from[User].where("age" < alberto2.getAge).asList[User]
 	    assertEquals(1,list size)		
 	}		
 	
@@ -196,7 +201,7 @@ class PimpedClassTest {
 		val alberto2 = newUser("alberto2",20)
 		val alberto3 = newUser("alberto3",30)
 		val alberto4 = newUser("alberto4",40)
-		val list = session.from(classOf[User]).where("age" <= alberto2.getAge).asList[User]
+		val list = session.from[User].where("age" <= alberto2.getAge).asList[User]
 	    assertEquals(2,list size)		
 	}
 	
@@ -206,7 +211,7 @@ class PimpedClassTest {
 		val alberto2 = newUser("alberto2",20)
 		val alberto3 = newUser("alberto3",30)
 		val alberto4 = newUser("outrute",40)
-		val list = session.from(classOf[User]).where("age" >= alberto2.getAge).and("name" like "alberto").asList[User]
+		val list = session.from[User].where("age" >= alberto2.getAge).and("name" like "alberto").asList[User]
         assertEquals(2,list size)		
 	}		
 	
@@ -226,9 +231,26 @@ class PimpedClassTest {
 		val alberto2 = newUser("alberto2",20)
 		val alberto3 = newUser("alberto3",30)
 		val alberto4 = newUser("outrute",40)
-		val list = session.query("from User where name=:name and age =:age").withParams("name" -> "alberto","age" -> alberto.getAge).asList[User]
+		val list = session.query("from User where name=:name and age =:age").withParams("name" -> "alberto","age" -> alberto.getAge).asList[User]		
 		assertEquals(1,list size)
 	}
+			
+//	@Test
+//	def shouldGroupUserByStreet {
+//		val alberto = newUser("alberto",10)
+//		val alberto2 = newUser("alberto2",20)
+//		val alberto3 = newUser("alberto3",15)
+//		val alberto4 = newUser("alberto4",30)
+//		val address = newAddress("x",alberto)
+//		val address2 = newAddress("x",alberto2)		
+//		val address3 = newAddress("y",alberto3)		
+//		val address4 = newAddress("y",alberto4)
+//		
+//		session.from(classOf[User]).join("addresses")
+//	}
+	
+	
+	//groupBy,having,colecao > 0
 	
 	
 	

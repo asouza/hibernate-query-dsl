@@ -49,22 +49,23 @@ class PimpedStringCondition(field:String) {
 
 class PimpedSession(session: Session) {
     
-  def all[T](klass: Class[T]) = session.createCriteria(klass).asList[T];
+  def all[T](implicit manifest: Manifest[T]) = session.createCriteria(manifest.erasure).asList[T];
   
-  def from(klass:Class[_]) = session.createCriteria(klass)
+  def from[T](implicit manifest: Manifest[T]) = session.createCriteria(manifest.erasure)
   
   def query(query:String) = session.createQuery(query)
  
-  def count(klass:Class[_]) = session.createCriteria(klass).count
+  def count[T](implicit manifest: Manifest[T]) = session.createCriteria(manifest.erasure).count
 
-  def exists(klass: Class[_]) = count(klass) > 0
+  def exists[T](implicit manifest: Manifest[T]) = count[T] > 0
 
-  def first[T](klass: Class[T]) = session.createCriteria(klass).first[T]
+  def first[T](implicit manifest: Manifest[T]) = session.createCriteria(manifest.erasure).first[T]
 
-  def last[T](klass: Class[T]) = session.createCriteria(klass).last[T]
+  def last[T](implicit manifest: Manifest[T]) = session.createCriteria(manifest.erasure).last[T]
 }
 
 class PimpedCriteria(criteria: Criteria) {
+		
   def unique[T]: T = criteria.uniqueResult.asInstanceOf[T]
 
   def asList[T]: java.util.List[T] = criteria.list.asInstanceOf[java.util.List[T]]
@@ -87,7 +88,7 @@ class PimpedCriteria(criteria: Criteria) {
   //@TODO this is a shit impl...
   def last[T] = {
 	  val list = criteria.asList[T]	  	  
-	  list.get(list.size-1).asInstanceOf[T]	 	   
+	  list.get(list.size-1)	 	   
   }  
   
 }
