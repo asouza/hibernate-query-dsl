@@ -1,14 +1,15 @@
 package br.com.caelum.hibernatequerydsl
-
 import PimpedSession._
-import org.hibernate.{Criteria, Session,Query}
-import org.hibernate.criterion.{Order, Criterion,Restrictions,MatchMode}
+import org.hibernate.{Criteria, Session, Query}
+import org.hibernate.criterion.{Order, Criterion, Restrictions, MatchMode, Projections, Property, ProjectionList}
 import org.hibernate.criterion.Projections._
 
 object PimpedSession {
   implicit def session2PimpedSession(session: Session) = new PimpedSession(session)
 
   implicit def criteria2PimpedCriteria(criteria: Criteria) = new PimpedCriteria(criteria)
+  
+  implicit def groupByBackToPimpedCriteria(groupBy:GroupBy) = new PimpedCriteria(groupBy.criteria)
   
   implicit def string2PimpedStringCondition(field:String) = new PimpedStringCondition(field)
   
@@ -65,20 +66,33 @@ class PimpedSession(session: Session) {
 }
 
 class PimpedCriteria(criteria: Criteria) {
-		
+			
   def unique[T]: T = criteria.uniqueResult.asInstanceOf[T]
 
   def asList[T]: java.util.List[T] = criteria.list.asInstanceOf[java.util.List[T]]
   
   def orderBy(order:Order) = criteria.addOrder(order)
  
-  def join(property:String) = {
-	  criteria.createAlias(property,property)
+  def join(field:String) = {
+	  criteria.createAlias(field,field)
 	  criteria
+  }
+
+  def hasMany(toManyField:String) = criteria.add(Restrictions.isNotEmpty(toManyField))
+  
+  def groupBy(fields:String*) = {
+	  val groupedProperties = projectionList
+	  fields.foreach(field => {
+	 	  groupedProperties.add(Property.forName(field).group)
+	  })
+	  criteria.setProjection(groupedProperties)
+	  new GroupBy(criteria,groupedProperties)
   }
   
   def where(condition:Criterion) = criteria.add(condition)
   
+  def where = criteria
+    
   def and(condition:Criterion) = criteria.add(condition)
       
   def count = criteria.setProjection(rowCount).uniqueResult.asInstanceOf[Long].longValue
@@ -87,8 +101,16 @@ class PimpedCriteria(criteria: Criteria) {
 
   //@TODO this is a shit impl...
   def last[T] = {
+	  
 	  val list = criteria.asList[T]	  	  
 	  list.get(list.size-1)	 	   
   }  
   
+}
+
+class GroupBy(val criteria:Criteria,projectionList:ProjectionList){
+	def avg(field:String) = {
+		projectionList.add(Projections.avg(field))
+		criteria.setProjection(projectionList)		
+	}
 }

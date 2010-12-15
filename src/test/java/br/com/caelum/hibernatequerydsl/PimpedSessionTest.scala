@@ -160,10 +160,6 @@ class PimpedClassTest {
 	    assertEquals(1,list size)		
 	}
 	
-	@Test
-	def shouldDoAJoinWithToManyAttribute {
-				
-	}
 	
 	@Test
 	def shouldDoASimpleQueryBasedOnSomeFields1 {
@@ -235,22 +231,53 @@ class PimpedClassTest {
 		assertEquals(1,list size)
 	}
 			
-//	@Test
-//	def shouldGroupUserByStreet {
-//		val alberto = newUser("alberto",10)
-//		val alberto2 = newUser("alberto2",20)
-//		val alberto3 = newUser("alberto3",15)
-//		val alberto4 = newUser("alberto4",30)
-//		val address = newAddress("x",alberto)
-//		val address2 = newAddress("x",alberto2)		
-//		val address3 = newAddress("y",alberto3)		
-//		val address4 = newAddress("y",alberto4)
-//		
-//		session.from(classOf[User]).join("addresses")
-//	}
+	@Test
+	def shouldGroupUserByStreet {
+		val alberto = newUser("alberto",10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",15)
+		val alberto4 = newUser("alberto4",30)
+		val address = newAddress("x",alberto)
+		val address2 = newAddress("x",alberto2)		
+		val address3 = newAddress("y",alberto3)		
+		val address4 = newAddress("y",alberto4)
+		
+		val list = session.from[User].join("addresses").groupBy("addresses.street").asList[User]
+		assertEquals(2,list size)
+	}
+	
+	@Test
+	//TODO descobrir como seleciona só um campo no criteria
+	def shouldGroupUserByStreetWithAgeSum {
+		val alberto = newUser("alberto",10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",15)
+		val alberto4 = newUser("alberto4",30)
+		val address = newAddress("x",alberto)
+		val address2 = newAddress("x",alberto2)		
+		val address3 = newAddress("y",alberto3)		
+		val address4 = newAddress("y",alberto4)
+		val list = session.from[User].join("addresses").groupBy("addresses.street").avg("age").asList
+//		val list = session.createQuery("select avg(u.age) from User u join u.addresses ad group by ad.street").list
+		assertEquals(2, list size)
+	}
+	
+	@Test
+	def shouldListJustUsersWithAddresses {
+		val alberto = newUser("alberto",10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",15)
+		val alberto4 = newUser("alberto4",30)
+		val address = newAddress("x",alberto)
+		val address2 = newAddress("x",alberto2)		
+		val address3 = newAddress("y",alberto3)		
+		
+		val list = session.from[User].where.hasMany("addresses").asList[User]
+		assertEquals(3,list size)
+	}		
 	
 	
-	//groupBy,having,colecao > 0
+	
 	
 	
 	

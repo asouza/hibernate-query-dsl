@@ -16,7 +16,7 @@ public class User {
 	private Integer id;
 	private String name;
 	private Integer age;
-	@OneToMany(cascade=CascadeType.ALL)
+	@OneToMany(cascade=CascadeType.ALL,mappedBy="user")
 	private List<Address> addresses = new ArrayList<Address>();
 	
 	
