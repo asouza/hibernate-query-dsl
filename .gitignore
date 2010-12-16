@@ -8,4 +8,5 @@ target
 .settings
 .classpath.old
 build
+.scala_dependencies
 
