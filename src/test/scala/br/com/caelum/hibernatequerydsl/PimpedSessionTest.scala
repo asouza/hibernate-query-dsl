@@ -1,7 +1,8 @@
 package br.com.caelum.hibernatequerydsl
+
+import org.hibernate.cfg.Configuration
 import br.com.caelum.hibernatequerydsl.PimpedSession._
 import org.hibernate.Session
-import org.hibernate.cfg.AnnotationConfiguration
 import org.hibernate.criterion.Order._
 import org.junit.{Test, Before, After}
 import org.junit.Assert._
@@ -12,7 +13,7 @@ class PimpedClassTest {
 	
 	@Before
 	def setUp {
-		val cfg = new AnnotationConfiguration();
+		val cfg = new Configuration();
 		cfg.configure().setProperty("hibernate.connection.url", "jdbc:hsqldb:mem:mydvdsDB");
 		session = cfg.buildSessionFactory().openSession();
 		session.beginTransaction();
