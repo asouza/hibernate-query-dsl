@@ -31,7 +31,7 @@ class PimpedClassTest {
 		}
 	}	
 	
-	private def newUser(name:String,age:Int=0) = {
+	private def newUser(name:String=null,age:Int=0) = {
 		val user = new User
 		user setName name
 		user setAge  age
@@ -210,6 +210,26 @@ class PimpedClassTest {
 		val alberto4 = newUser("outrute",40)
 		val list = session.from[User].where("age" >= alberto2.getAge).and("name" like "alberto").asList[User]
         assertEquals(2,list size)		
+	}
+	
+	@Test
+	def shouldDoASimpleQueryBasedOnSomeFields6 {
+		val alberto = newUser(null,10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",30)
+		val alberto4 = newUser("outrute",40)
+		val list = session.from[User].where("name" isNull).asList[User]
+        assertEquals(1,list size)		
+	}
+	
+	@Test
+	def shouldDoASimpleQueryBasedOnSomeFields7 {
+		val alberto = newUser(null,10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",30)
+		val alberto4 = newUser("outrute",40)
+		val list = session.from[User].where("name" isNotNull).asList[User]
+        assertEquals(3,list size)		
 	}		
 	
 	@Test

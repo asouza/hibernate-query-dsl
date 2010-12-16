@@ -1,4 +1,6 @@
 package br.com.caelum.hibernatequerydsl
+
+import java.io.Serializable
 import PimpedSession._
 import org.hibernate.{Criteria, Session, Query}
 import org.hibernate.criterion.{Order, Criterion, Restrictions, MatchMode, Projections, Property, ProjectionList}
@@ -43,15 +45,20 @@ class PimpedStringCondition(field:String) {
 
 	def like(value:String) = Restrictions.ilike(field,value,MatchMode.ANYWHERE)
 	
+	def isNull = Restrictions.isNull(field)
+	
+	def isNotNull = Restrictions.isNotNull(field)
+	
 	def desc = Order.desc(field)
   
     def asc = Order.asc(field)	
+    
 }
 
 class PimpedSession(session: Session) {
     
   def all[T](implicit manifest: Manifest[T]) = session.createCriteria(manifest.erasure).asList[T];
-  
+    
   def from[T](implicit manifest: Manifest[T]) = session.createCriteria(manifest.erasure)
   
   def query(query:String) = session.createQuery(query)
@@ -83,7 +90,7 @@ class PimpedCriteria(criteria: Criteria) {
   def groupBy(fields:String*) = {
 	  val groupedProperties = projectionList
 	  fields.foreach(field => {
-	 	  groupedProperties.add(Property.forName(field).group)
+	 	  groupedProperties.add(Projections.groupProperty(field))
 	  })
 	  criteria.setProjection(groupedProperties)
 	  new GroupBy(criteria,groupedProperties)
@@ -101,7 +108,7 @@ class PimpedCriteria(criteria: Criteria) {
 
   //@TODO this is a shit impl...
   def last[T] = {
-	  
+	  //limit (select count(1) from T)
 	  val list = criteria.asList[T]	  	  
 	  list.get(list.size-1)	 	   
   }  
