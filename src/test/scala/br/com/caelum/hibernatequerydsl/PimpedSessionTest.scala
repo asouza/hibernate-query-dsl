@@ -262,7 +262,6 @@ class PimpedClassTest {
 		val address2 = newAddress("x",alberto2)		
 		val address3 = newAddress("y",alberto3)		
 		val address4 = newAddress("y",alberto4)
-		
 		val list = session.from[User].join("addresses").groupBy("addresses.street").asList[User]
 		assertEquals(2,list size)
 	}
@@ -277,9 +276,8 @@ class PimpedClassTest {
 		val address = newAddress("x",alberto)
 		val address2 = newAddress("x",alberto2)		
 		val address3 = newAddress("y",alberto3)		
-		val address4 = newAddress("y",alberto4)
+		val address4 = newAddress("y",alberto4)		
 		val list = session.from[User].join("addresses").groupBy("addresses.street").avg("age").asList
-//		val list = session.createQuery("select avg(u.age) from User u join u.addresses ad group by ad.street").list
 		assertEquals(2, list size)
 	}
 	

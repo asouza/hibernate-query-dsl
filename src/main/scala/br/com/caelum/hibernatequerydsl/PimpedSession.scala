@@ -1,5 +1,7 @@
 package br.com.caelum.hibernatequerydsl
 
+import org.hibernate.impl.SessionImpl
+import org.hibernate.impl.CriteriaImpl
 import java.io.Serializable
 import PimpedSession._
 import org.hibernate.{Criteria, Session, Query}
@@ -73,7 +75,7 @@ class PimpedSession(session: Session) {
 }
 
 class PimpedCriteria(criteria: Criteria) {
-			
+		
   def unique[T]: T = criteria.uniqueResult.asInstanceOf[T]
 
   def asList[T]: java.util.List[T] = criteria.list.asInstanceOf[java.util.List[T]]
@@ -102,15 +104,15 @@ class PimpedCriteria(criteria: Criteria) {
     
   def and(condition:Criterion) = criteria.add(condition)
       
-  def count = criteria.setProjection(rowCount).uniqueResult.asInstanceOf[Long].longValue
+  def count = criteria.setProjection(rowCount).uniqueResult.asInstanceOf[Long].intValue
   
   def first[T] = criteria.setFirstResult(0).setMaxResults(1).unique[T]
 
-  //@TODO this is a shit impl...
-  def last[T] = {
-	  //limit (select count(1) from T)
-	  val list = criteria.asList[T]	  	  
-	  list.get(list.size-1)	 	   
+  //@TODO almost there, just discover how to do this inside a subquery :).
+  def last[T](implicit manifest: Manifest[T]) = {
+	  val dirtySession = criteria.asInstanceOf[CriteriaImpl].getSession.asInstanceOf[Session]	  
+	  val size = dirtySession.from[T].count
+	  criteria.setFirstResult(size.intValue - 1).unique[T]
   }  
   
 }
@@ -118,6 +120,6 @@ class PimpedCriteria(criteria: Criteria) {
 class GroupBy(val criteria:Criteria,projectionList:ProjectionList){
 	def avg(field:String) = {
 		projectionList.add(Projections.avg(field))
-		criteria.setProjection(projectionList)		
+		criteria.setProjection(projectionList)			
 	}
 }

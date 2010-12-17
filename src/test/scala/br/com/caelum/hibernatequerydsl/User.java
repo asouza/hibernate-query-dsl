@@ -21,7 +21,7 @@ public class User {
 	
 	
 
-	public List<Address> getAddresses() {
+	public List<Address> getAddresses() {		
 		return addresses;
 	}
 
@@ -51,6 +51,12 @@ public class User {
 
 	public void setAge(Integer age) {
 		this.age = age;
+	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return name;
 	}
 
 }
