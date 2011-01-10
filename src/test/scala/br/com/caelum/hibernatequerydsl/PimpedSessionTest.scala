@@ -267,8 +267,7 @@ class PimpedClassTest {
 	}
 	
 	@Test
-	//TODO descobrir como seleciona só um campo no criteria
-	def shouldGroupUserByStreetWithAgeSum {
+	def shouldGroupUserByStreetWithAvgAge {
 		val alberto = newUser("alberto",10)
 		val alberto2 = newUser("alberto2",20)
 		val alberto3 = newUser("alberto3",15)
@@ -277,9 +276,41 @@ class PimpedClassTest {
 		val address2 = newAddress("x",alberto2)		
 		val address3 = newAddress("y",alberto3)		
 		val address4 = newAddress("y",alberto4)		
-		val list = session.from[User].join("addresses").groupBy("addresses.street").avg("age").asList
+		//List[Array[Object]]
+		val list = session.from[User].join("addresses").groupBy("addresses.street").avg("age").asList[Array[Object]]
 		assertEquals(2, list size)
+		assertEquals(15.0, list.get(0)(1))
 	}
+	
+	@Test
+	def shouldGroupUserByStreetWithSumAge {
+		val alberto = newUser("alberto",10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",15)
+		val alberto4 = newUser("alberto4",30)
+		val address = newAddress("x",alberto)
+		val address2 = newAddress("x",alberto2)		
+		val address3 = newAddress("y",alberto3)		
+		val address4 = newAddress("y",alberto4)		
+		val list = session.from[User].join("addresses").groupBy("addresses.street").sum("age").asList[Array[Object]]
+		assertEquals(2, list size)
+		assertEquals(30L, list.get(0)(1))
+	}
+	
+	@Test
+	def shouldGroupUserByStreetWithCountAge {
+		val alberto = newUser("alberto",10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",15)
+		val alberto4 = newUser("alberto4",30)
+		val address = newAddress("x",alberto)
+		val address2 = newAddress("x",alberto2)		
+		val address3 = newAddress("y",alberto3)		
+		val address4 = newAddress("y",alberto4)		
+		val list = session.from[User].join("addresses").groupBy("addresses.street").count("age").asList[Array[Object]]
+		assertEquals(2, list size)
+		assertEquals(2L, list.get(0)(1))
+	}	
 	
 	@Test
 	def shouldListJustUsersWithAddresses {
@@ -291,8 +322,36 @@ class PimpedClassTest {
 		val address2 = newAddress("x",alberto2)		
 		val address3 = newAddress("y",alberto3)		
 		
-		val list = session.from[User].where.hasMany("addresses").asList[User]
+		val list = session.from[User].where.has("addresses").asList[User]
 		assertEquals(3,list size)
+	}		
+	
+	@Test
+	def shouldListJustUsersWithAddressesFilteringBySomeAttribute {
+		val alberto = newUser("alberto",10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",15)
+		val alberto4 = newUser("alberto4",30)
+		val address = newAddress("x",alberto)
+		val address2 = newAddress("x",alberto2)		
+		val address3 = newAddress("y",alberto3)		
+		
+		val list = session.from[User].includes("addresses").where("addresses.street" equal "y").asList[User]
+		assertEquals(1,list size)
+	}
+	
+	@Test
+	def shouldListJustUsersWithAddressesFilteringBySomeAttribute2 {
+		val alberto = newUser("alberto",10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",15)
+		val alberto4 = newUser("alberto4",30)
+		val address = newAddress("x",alberto)
+		val address2 = newAddress("x",alberto2)		
+		val address3 = newAddress("y",alberto3)		
+		//TODO alterar o nome do metodo de includes para outra coisa. Includes parece que vai ser eager
+		val list = session.from[User].includes("addresses").where("addresses.street" equal "y").asList[User]
+		assertEquals(1,list size)		
 	}		
 	
 	

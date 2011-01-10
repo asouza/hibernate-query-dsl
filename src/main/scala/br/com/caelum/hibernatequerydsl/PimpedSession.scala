@@ -87,11 +87,15 @@ class PimpedCriteria(criteria: Criteria) {
 	  criteria
   }
 
-  def hasMany(toManyField:String) = criteria.add(Restrictions.isNotEmpty(toManyField))
+  def has(toManyField:String) = criteria.add(Restrictions.isNotEmpty(toManyField))
+  
+  def includes(toManyField:String) = {
+	  join(toManyField).has(toManyField)
+  }
   
   def groupBy(fields:String*) = {
 	  val groupedProperties = projectionList
-	  fields.foreach(field => {
+	  fields.foreach(field => {	 	  
 	 	  groupedProperties.add(Projections.groupProperty(field))
 	  })
 	  criteria.setProjection(groupedProperties)
@@ -122,4 +126,14 @@ class GroupBy(val criteria:Criteria,projectionList:ProjectionList){
 		projectionList.add(Projections.avg(field))
 		criteria.setProjection(projectionList)			
 	}
+	
+	def sum(field:String) = {
+		projectionList.add(Projections.sum(field))
+		criteria.setProjection(projectionList)			
+	}
+	
+	def count(field:String) = {
+		projectionList.add(Projections.count(field))
+		criteria.setProjection(projectionList)			
+	}	
 }
