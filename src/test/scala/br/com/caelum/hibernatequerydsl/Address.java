@@ -5,6 +5,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.criterion.Projections;
+
 @Entity
 public class Address {
 
@@ -16,6 +18,7 @@ public class Address {
 	private User user;
 
 	public Integer getId() {
+		Projections.property("campo").as("");
 		return id;
 	}
 

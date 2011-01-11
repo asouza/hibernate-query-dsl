@@ -1,5 +1,6 @@
 package br.com.caelum.hibernatequerydsl
 
+import scala.reflect.BeanProperty
 import org.hibernate.cfg.Configuration
 import br.com.caelum.hibernatequerydsl.PimpedSession._
 import org.hibernate.Session
@@ -276,7 +277,6 @@ class PimpedClassTest {
 		val address2 = newAddress("x",alberto2)		
 		val address3 = newAddress("y",alberto3)		
 		val address4 = newAddress("y",alberto4)		
-		//List[Array[Object]]
 		val list = session.from[User].join("addresses").groupBy("addresses.street").avg("age").asList[Array[Object]]
 		assertEquals(2, list size)
 		assertEquals(15.0, list.get(0)(1))
@@ -349,14 +349,35 @@ class PimpedClassTest {
 		val address = newAddress("x",alberto)
 		val address2 = newAddress("x",alberto2)		
 		val address3 = newAddress("y",alberto3)		
-		//TODO alterar o nome do metodo de includes para outra coisa. Includes parece que vai ser eager
 		val list = session.from[User].includes("addresses").where("addresses.street" equal "y").asList[User]
 		assertEquals(1,list size)		
 	}		
 	
+	@Test
+	def shouldSelectByFields {
+		val alberto = newUser("alberto",10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",15)
+		val alberto4 = newUser("alberto4",30)
+		val address = newAddress("x",alberto)
+		val address2 = newAddress("x",alberto2)		
+		val address3 = newAddress("y",alberto3)		
+		val list = session.from[User].select("name").asList[String]
+		assertEquals("alberto",list.get(0))
+	}
 	
-	
-	
-	
-	
+	@Test
+	def shouldTransformArrayToMyResultTransformer {
+		val alberto = newUser("alberto",10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",15)
+		val alberto4 = newUser("alberto4",30)
+		val address = newAddress("x",alberto)
+		val address2 = newAddress("x",alberto2)		
+		val address3 = newAddress("y",alberto3)	
+		val list = session.from[User].join("addresses").select("name").selectWithAliases("addresses.street".alias("street")).asList[StreetWithName]
+		assertEquals("alberto",list.get(1))
+	}			
 }
+
+class StreetWithName(@BeanProperty name:String,@BeanProperty street:String)	
