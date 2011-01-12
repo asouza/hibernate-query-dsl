@@ -374,10 +374,8 @@ class PimpedClassTest {
 		val alberto4 = newUser("alberto4",30)
 		val address = newAddress("x",alberto)
 		val address2 = newAddress("x",alberto2)		
-		val address3 = newAddress("y",alberto3)	
-		val list = session.from[User].join("addresses").select("name").selectWithAliases("addresses.street".alias("street")).asList[StreetWithName]
-		assertEquals("alberto",list.get(1))
+		val address3 = newAddress("y",alberto3)
+		val list = session.from[User].join("addresses").select("name").selectWithAliases("addresses.street".alias("street")).transformToBean[StreetWithName].asList
+		assertEquals("alberto",list.get(0).getName)
 	}			
 }
-
-class StreetWithName(@BeanProperty name:String,@BeanProperty street:String)	
