@@ -1,5 +1,6 @@
 apply plugin: 'scala'
 apply plugin: 'eclipse'
+apply plugin: 'idea'
 
 compileScala{
 	options.encoding='UTF-8'
@@ -14,7 +15,7 @@ repositories {
 		mavenRepo urls: 'http://repository.jboss.org/nexus/content/groups/public/'
 		mavenRepo urls: 'http://repo1.maven.org/maven2/'
 		mavenRepo urls: 'http://download.java.net/maven/2'
-		mavenRepo urls: 'http://scala-tools.org/repo-releases/'
+		mavenRepo urls: 'http://scala-tools.org/repo-releases/'		
 }
 
 dependencies {	

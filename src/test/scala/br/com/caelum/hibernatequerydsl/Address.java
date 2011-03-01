@@ -18,7 +18,6 @@ public class Address {
 	private User user;
 
 	public Integer getId() {
-		Projections.property("campo").as("");
 		return id;
 	}
 

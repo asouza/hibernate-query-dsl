@@ -21,7 +21,7 @@ public class User {
 	
 	
 
-	public List<Address> getAddresses() {		
+	public List<Address> getAddresses() {
 		return addresses;
 	}
 

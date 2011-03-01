@@ -60,9 +60,11 @@ class PimpedStringCondition(field: String) {
 
 class PimpedSession(session: Session) {
 
-  def all[T](implicit manifest: Manifest[T]) = session.createCriteria(manifest.erasure).asList[T];
+  def all[T](implicit manifest: Manifest[T]) = {
+    session.createCriteria(manifest.erasure).asList[T]
+  }
 
-  def from[T](implicit manifest: Manifest[T]) = session.createCriteria(manifest.erasure)
+  def from[T](implicit manifest: Manifest[T]) = new PimpedCriteria(session.createCriteria(manifest.erasure))
 
   def query(query: String) = session.createQuery(query)
 
@@ -121,6 +123,7 @@ class PimpedCriteria(criteria: Criteria) {
     val size = dirtySession.from[T].count
     criteria.setFirstResult(size.intValue - 1).unique[T]
   }
+  
   def groupBy(fields: String*) = {
     fields.foreach(field => {
       projections.add(Projections.groupProperty(field))
