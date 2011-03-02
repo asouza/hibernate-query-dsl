@@ -9,6 +9,7 @@ import PimpedSession._
 import org.hibernate.{ Criteria, Session, Query }
 import org.hibernate.criterion.{ Order, Criterion, Restrictions, MatchMode, Projections, Property, ProjectionList }
 import org.hibernate.criterion.Projections._
+import scala.reflect.{Apply, Select, Literal, Tree,Code,This }
 
 object PimpedSession {
   implicit def session2PimpedSession(session: Session) = new PimpedSession(session)
@@ -18,6 +19,65 @@ object PimpedSession {
   implicit def string2PimpedStringCondition(field: String) = new PimpedStringCondition(field)
 
   implicit def hibernateQuery2PimpedQuery(query: Query) = new PimpedQuery(query)
+  
+  implicit def code2PimpedCode[T](code:Code[T]) = new PimpedCode(code)
+  
+  implicit def code2String[T](code:Code[T]) = new PimpedCode(code).toString
+}
+
+class PimpedCode[T](code: Code[T]) {
+  
+
+  implicit def string2WithRubyPowers(str: String) = new StringWithRubyPowers(str)
+  
+  class StringWithRubyPowers(str: String) {
+    def withFirstCharLowered = {
+      str.substring(0, 1).toLowerCase + str.substring(1, str.length)
+    }
+  }
+
+  private def evaluate: String = {
+    def extractString(tree: Tree, properties: List[String] = List()): List[String] = {
+      //literal is for local variables and this for instance
+      if (tree.isInstanceOf[Literal] ||tree.isInstanceOf[This] || tree.isInstanceOf[Select]) {
+        return properties
+      }
+      
+      val expressao = tree.asInstanceOf[Apply].fun.asInstanceOf[Select]
+      val GetterExpression = """(get)?(\w*){1}""".r
+      expressao.sym.name match {
+        case GetterExpression(part1, part2) => {
+          extractString(expressao.qual, part2.withFirstCharLowered :: properties)
+        }
+      }
+    }
+    val tree = code.tree
+    extractString(tree).mkString(".")
+  } 
+  
+  override def toString = evaluate
+  
+  def equal(value: Object) = Restrictions.eq(evaluate, value)
+
+  def >(value: Object) = Restrictions.gt(evaluate, value)
+
+  def >=(value: Object) = Restrictions.ge(evaluate, value)
+
+  def <(value: Object) = Restrictions.lt(evaluate, value)
+
+  def <=(value: Object) = Restrictions.le(evaluate, value)
+
+  def like(value: String) = Restrictions.ilike(evaluate, value, MatchMode.ANYWHERE)
+
+  def isNull = Restrictions.isNull(evaluate)
+
+  def isNotNull = Restrictions.isNotNull(evaluate)
+
+  def desc = Order.desc(evaluate)
+
+  def asc = Order.asc(evaluate)
+
+  def alias(newName: String) = Projections.property(evaluate).as(newName)  
 }
 
 class PimpedQuery(query: Query) {
@@ -64,7 +124,7 @@ class PimpedSession(session: Session) {
     session.createCriteria(manifest.erasure).asList[T]
   }
 
-  def from[T](implicit manifest: Manifest[T]) = new PimpedCriteria(session.createCriteria(manifest.erasure))
+  def from[T](implicit manifest: Manifest[T]) = session.createCriteria(manifest.erasure)
 
   def query(query: String) = session.createQuery(query)
 
@@ -80,11 +140,10 @@ class PimpedSession(session: Session) {
 class PimpedCriteria(criteria: Criteria) {
 
   val projections = projectionList
-  val criteriaImpl = criteria.asInstanceOf[CriteriaImpl]
+  val criteriaImpl = criteria.asInstanceOf[CriteriaImpl]  
 
   if (criteriaImpl.getProjection != null) {
     projections.add(criteriaImpl.getProjection)
-    println(projections)
   }
 
   def unique[T]: T = {
