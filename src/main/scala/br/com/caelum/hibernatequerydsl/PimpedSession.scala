@@ -12,6 +12,9 @@ import org.hibernate.criterion.Projections._
 import scala.reflect.{Apply, Select, Literal, Tree,Code,This }
 
 object PimpedSession {
+
+  def exp[T](expr : => T) = Code.lift(expr)	
+	
   implicit def session2PimpedSession(session: Session) = new PimpedSession(session)
 
   implicit def criteria2PimpedCriteria(criteria: Criteria) = new PimpedCriteria(criteria)
@@ -46,7 +49,7 @@ class PimpedCode[T](code: Code[T]) {
       val expressao = tree.asInstanceOf[Apply].fun.asInstanceOf[Select]
       val GetterExpression = """(get)?(\w*){1}""".r
       expressao.sym.name match {
-        case GetterExpression(part1, part2) => {
+        case GetterExpression(_, part2) => {
           extractString(expressao.qual, part2.withFirstCharLowered :: properties)
         }
       }
