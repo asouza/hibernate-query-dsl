@@ -15,18 +15,18 @@ object CrazyTests {
 	  }
   }
   
+  class X {
+	  val y = ""
+  }
   
   var endereco = new Address
   
   def main(args: Array[String]): Unit = {
 	var user = new User
+	var fn = (a:Any) => a 
 	user.setName("alberto")
+
 	
-	def exp[T](fn:(User) => T) {
-		println(lift(fn(new User)).tree)
-	}
-    
-    println(exp(_.getName))
     //println(lift(user2.getAge).tree)    
     //println(exp(user2.getAge).tree)
   }

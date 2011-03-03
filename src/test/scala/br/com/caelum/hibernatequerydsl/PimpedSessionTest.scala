@@ -4,6 +4,7 @@ import org.junit.Ignore
 import scala.reflect.BeanProperty
 import org.hibernate.cfg.Configuration
 import br.com.caelum.hibernatequerydsl.PimpedSession._
+import br.com.caelum.hibernatequerydsl.Expression._
 import org.hibernate.Session
 import org.hibernate.criterion.Order._
 import org.junit.{Test, Before, After}
@@ -91,7 +92,7 @@ class PimpedClassTest {
 	def shouldGetFirstBasedOnSomeField {
 		val alberto = newUser("alberto") 
 		val joao = newUser("joao")
-		val userRetrieved = session.from[User].orderBy(lift(alberto.getName).desc).first[User]
+		val userRetrieved = session.from[User].orderBy(lift(userToQuery.getName).desc).first[User]
 		assertEquals(joao,userRetrieved)
 	}
 	
@@ -150,7 +151,7 @@ class PimpedClassTest {
 		val alberto = newUser("alberto")
 		val alberto2 = newUser("alberto2")
 		val address = newAddress("rua da casa de nao sei quem",alberto)
-		val address2 = newAddress("rua da casa de nao sei quem",alberto2)		
+		val address2 = newAddress("rua da casa de nao sei quem",alberto2)
 		val list = session.from[Address].join(lift(addressToQuery.getUser)).where(lift(addressToQuery.getUser.getName).equal("alberto2")).asList[Address]
 		assertEquals(1,list size)
 		

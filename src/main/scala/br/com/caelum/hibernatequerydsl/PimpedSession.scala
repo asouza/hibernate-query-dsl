@@ -12,8 +12,6 @@ import org.hibernate.criterion.Projections._
 import scala.reflect.{Apply, Select, Literal, Tree,Code,This }
 
 object PimpedSession {
-
-  def exp[T](expr : => T) = Code.lift(expr)	
 	
   implicit def session2PimpedSession(session: Session) = new PimpedSession(session)
 
@@ -25,7 +23,7 @@ object PimpedSession {
   
   implicit def code2PimpedCode[T](code:Code[T]) = new PimpedCode(code)
   
-  implicit def code2String[T](code:Code[T]) = new PimpedCode(code).toString
+  implicit def code2String[T](code:Code[T]) = new PimpedCode(code).toString  
 }
 
 class PimpedCode[T](code: Code[T]) {
@@ -154,6 +152,7 @@ class PimpedCriteria(criteria: Criteria) {
   }
 
   def asList[T]: java.util.List[T] = {
+	  println(criteria)
     criteria.list.asInstanceOf[java.util.List[T]]
   }
 
