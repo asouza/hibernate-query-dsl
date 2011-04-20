@@ -67,6 +67,8 @@ class PimpedCode[T](code: Code[T]) {
   def <(value: Object) = Restrictions.lt(evaluate, value)
 
   def <=(value: Object) = Restrictions.le(evaluate, value)
+  
+  def !==(value: Object) = Restrictions.ne(evaluate,value)
 
   def like(value: String) = Restrictions.ilike(evaluate, value, MatchMode.ANYWHERE)
 
@@ -104,6 +106,8 @@ class PimpedStringCondition(field: String) {
   def <(value: Object) = Restrictions.lt(field, value)
 
   def <=(value: Object) = Restrictions.le(field, value)
+  
+  def !==(value: Object) = Restrictions.ne(field,value)
 
   def like(value: String) = Restrictions.ilike(field, value, MatchMode.ANYWHERE)
 
@@ -152,7 +156,6 @@ class PimpedCriteria(criteria: Criteria) {
   }
 
   def asList[T]: java.util.List[T] = {
-	  println(criteria)
     criteria.list.asInstanceOf[java.util.List[T]]
   }
 

@@ -20,8 +20,8 @@ class PimpedClassTest {
 	@Before
 	def setUp {
 		val cfg = new Configuration();
-		cfg.configure().setProperty("hibernate.connection.url", "jdbc:hsqldb:mem:mydvdsDB");
-		session = cfg.buildSessionFactory().openSession();
+		//cfg.configure().setProperty("hibernate.connection.url", "jdbc:hsqldb:mem:mydvdsDB");
+		session = cfg.configure().buildSessionFactory().openSession();
 		session.beginTransaction();
 	}
 
@@ -132,7 +132,7 @@ class PimpedClassTest {
 	def shouldGetTheLastAscAndDescOrderedOnSomeFields {
 		val alberto = newUser("alberto",10) 
 		val alberto2 = newUser("alberto",20)
-		val userRetrieved = session.from[User].orderBy(lift(userToQuery.getName).asc).orderBy(lift(userToQuery.getName).desc).last[User]
+		val userRetrieved = session.from[User].orderBy(lift(userToQuery.getName).asc).orderBy(lift(userToQuery.getAge).desc).last[User]
 		assertEquals(alberto,userRetrieved)
 	}	
 	
@@ -208,6 +208,7 @@ class PimpedClassTest {
 	    assertEquals(2,list size)		
 	}
 	
+	
 	@Test
 	def shouldDoASimpleQueryBasedOnSomeFields5 {
 		val alberto = newUser("alberto",10)
@@ -236,6 +237,16 @@ class PimpedClassTest {
 		val alberto4 = newUser("outrute",40)
 		val list = session.from[User].where(lift(userToQuery.getName) isNotNull).asList[User]
         assertEquals(3,list size)		
+	}
+	
+	@Test
+	def shouldDoASimpleQueryBasedOnSomeFields8 {
+		val alberto = newUser("alberto",10)
+		val alberto2 = newUser("alberto2",20)
+		val alberto3 = newUser("alberto3",30)
+		val alberto4 = newUser("alberto4",40)		
+		val list = session.from[User].where("name" !== "alberto").asList[User]
+	    assertEquals(3,list size)		
 	}		
 	
 	@Test
