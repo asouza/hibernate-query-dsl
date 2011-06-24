@@ -7,11 +7,11 @@ import PimpedSession._
 
 object CrazyTests {
 	
-  def meuwhile[T](condition: => Boolean)(block: => T) {
+  def mywhile[T](condition: => Boolean)(block: => T) {
 	  if (condition) {
 	 	  block
 	 	  
-	 	  meuwhile(condition)(block)
+	 	  mywhile(condition)(block)
 	  }
   }
   
@@ -19,7 +19,7 @@ object CrazyTests {
 	  val y = ""
   }
   
-  var endereco = new Address
+  var address = new Address
   
   def main(args: Array[String]): Unit = {
 	var user = new User
