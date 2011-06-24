@@ -9,5 +9,8 @@ target
 .classpath.old
 build
 .scala_dependencies
+*.iml
+*.ipr
+*.iws
 
 
