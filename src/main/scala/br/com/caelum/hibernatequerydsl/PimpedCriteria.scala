@@ -7,11 +7,15 @@ import org.hibernate.transform.Transformers
 import org.hibernate.{Session, Criteria}
 import net.sf.cglib.proxy.Enhancer
 
-class PimpedCriteria[T](val criteria: Criteria) {
+/**
+ * A criteria that will query on objects of type T, projecting
+ * on type P. This criteria is backed by a hibernate criteria.
+ */
+class PimpedCriteria[T,P](prefix:String, val criteria: Criteria) {
 
   import PimpedSession._
-  type Myself = PimpedCriteria[T]
-  implicit def criteriaToPimped(partial:Criteria) = new PimpedCriteria[T](partial)
+  type Myself = PimpedCriteria[T,P]
+  implicit def criteriaToPimped(partial:Criteria) = new PimpedCriteria[T,P](prefix, partial)
 
   val projections = projectionList
   val criteriaImpl = criteria.asInstanceOf[CriteriaImpl]
@@ -20,28 +24,34 @@ class PimpedCriteria[T](val criteria: Criteria) {
     projections.add(criteriaImpl.getProjection)
   }
 
-  def unique[Y]: Y = {
-    criteria.uniqueResult.asInstanceOf[Y]
-  }
+  def unique[Y]: Y = criteria.uniqueResult.asInstanceOf[Y]
 
   def asList[Y]: java.util.List[Y] = criteria.list.asInstanceOf[java.util.List[Y]]
 
   def using(f:(Criteria) => Criteria):Myself = f(criteria)
 
-  def list:java.util.List[T] = asList[T]
+  def list:java.util.List[P] = asList[P]
 
   def orderBy(order: Order):Myself = criteria.addOrder(order)
 
   // TODO use only one class per entity
-	def orderBy2(f:(T) => Unit)(implicit entityType:Manifest[T]) = {
-		val handler = new InvocationMemorizingCallback
-    val proxy = Enhancer.create(entityType.erasure, handler).asInstanceOf[T]
-		f(proxy)
-		new OrderThis[T](handler.invokedPath, this)
+	def orderBy(f:(T) => Unit)(implicit entityType:Manifest[T]) = {
+    val path = evaluate(f)
+		new OrderThis[T,P](prefix + path, this)
 	}
 
-  def join(field: String):Myself = {
-    criteria.createAlias(field, field)
+  def join(field: String):Myself = criteria.createAlias(field, field)
+
+  def join[Joiner](f:(T) => Joiner)(implicit entityType:Manifest[T]) = {
+    val field = evaluate(f)
+    new PimpedCriteria[Joiner, P](prefix + field + ".", criteria.createAlias(field, field))
+  }
+
+  private def evaluate[K,X](f:(K) => X)(implicit entityType:Manifest[K]):String = {
+    val handler = new InvocationMemorizingCallback
+    val proxy = Enhancer.create(entityType.erasure, handler).asInstanceOf[K]
+    f(proxy)
+    handler.invokedPath
   }
 
   def has(toManyField: String):Myself = {
@@ -107,6 +117,6 @@ class PimpedCriteria[T](val criteria: Criteria) {
   }
 
   def transformToBean[Y](implicit manifest: Manifest[Y]) = {
-    new Transformer[Y](criteria.setResultTransformer(Transformers.aliasToBean(manifest.erasure)))
+    new Transformer[Y,P](criteria.setResultTransformer(Transformers.aliasToBean(manifest.erasure)))
   }
 }
