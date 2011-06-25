@@ -115,6 +115,11 @@ class PimpedCriteria[T,P](prefix:String, val criteria: Criteria) {
     projections.add(Projections.count(field))
     criteria.setProjection(projections)
   }
+  
+  def distinct(field:String):Myself = {
+    projections.add(Projections.distinct(Projections.property(field)))
+    criteria.setProjection(projections)
+  }
 
   def transformToBean[Y](implicit manifest: Manifest[Y]) = {
     new Transformer[Y,P](criteria.setResultTransformer(Transformers.aliasToBean(manifest.erasure)))
