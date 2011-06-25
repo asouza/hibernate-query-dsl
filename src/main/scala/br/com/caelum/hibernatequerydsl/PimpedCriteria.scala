@@ -5,7 +5,7 @@ import org.hibernate.criterion.Projections._
 import org.hibernate.impl.CriteriaImpl
 import org.hibernate.transform.Transformers
 import org.hibernate.{Session, Criteria}
-import net.sf.cglib.proxy.{InvocationHandler, Enhancer}
+import net.sf.cglib.proxy.Enhancer
 
 class PimpedCriteria[T](val criteria: Criteria) {
 

@@ -5,8 +5,6 @@ import org.hibernate.cfg.Configuration
 import org.junit.{Test, After, Before}
 import org.junit.Assert._
 import br.com.caelum.hibernatequerydsl.PimpedSession._
-import javax.management.remote.rmi._RMIConnection_Stub
-
 class TypeSafeAcceptanceTest {
 
   private var session:Session = _
