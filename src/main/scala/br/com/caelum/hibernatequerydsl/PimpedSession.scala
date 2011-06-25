@@ -8,7 +8,7 @@ object PimpedSession {
 	
   implicit def session2PimpedSession(session: Session) = new PimpedSession(session)
 
-  implicit def pimpedCriteria2Criteria[T](pimped: PimpedCriteria[T]) = pimped.criteria
+  implicit def pimpedCriteria2Criteria[T,P](pimped: PimpedCriteria[T,P]) = pimped.criteria
 
   implicit def string2PimpedStringCondition(field: String) = new PimpedStringCondition(field)
 
@@ -18,7 +18,7 @@ object PimpedSession {
   
   implicit def code2String[T](code:Code[T]) = new PimpedCode(code).toString  
 
-  implicit def orderThisToPimped[T](order:OrderThis[T]) = order.asc
+  implicit def orderThisToPimped[T,P](order:OrderThis[T,P]) = order.asc
 }
 
 class PimpedCode[T](code: Code[T]) {
@@ -125,7 +125,7 @@ class PimpedSession(session: Session) {
 
   def from[T](implicit manifest: Manifest[T]) = {
     val criteria = session.createCriteria(manifest.erasure)
-	  new PimpedCriteria[T](criteria)
+	  new PimpedCriteria[T,T]("", criteria)
   }
 
   def query(query: String) = session.createQuery(query)
@@ -140,9 +140,9 @@ class PimpedSession(session: Session) {
 }
 
 
-class Transformer[T](criteria: Criteria) {
-  def asList = new PimpedCriteria[T](criteria).asList[T]
+class Transformer[T,P](criteria: Criteria) {
+  def asList = new PimpedCriteria[T,P]("", criteria).asList[T]
   
-  def unique = new PimpedCriteria[T](criteria).unique[T]
+  def unique = new PimpedCriteria[T,P]("", criteria).unique[T]
 }
 

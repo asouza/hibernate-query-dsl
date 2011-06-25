@@ -19,10 +19,12 @@ Just some examples of type safe way:
 val user = new User
 val address = new Address 
 
-	session.from[User].orderBy(_.getName)
-	session.from[User].orderBy(_.getName).asc
-	session.from[User].orderBy(_.getName).asc.orderBy(_.getAge).desc
-	
+	session.from[User].orderBy(_.getName).list
+	session.from[User].orderBy(_.getName).asc.list
+	session.from[User].orderBy(_.getName).asc.orderBy(_.getAge).desc.list
+    val addresses = session.from[Address].join(_.getUser).orderBy(_.getName).list
+    val addresses = session.from[Address].join(_.getUser).where("user.name" equal "guilherme").list
+
 	session.from[User].orderBy(lift(user.getName).asc).orderBy(lift(user.getAge).desc).asList[User]
 
 	session.from[User].where(lift(user.getAge) >= 20).and(lift(user.getName) like "alberto").asList[User]
