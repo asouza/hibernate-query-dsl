@@ -3,7 +3,7 @@ package br.com.caelum.hibernatequerydsl
 import net.sf.cglib.proxy.InvocationHandler
 
 class InvocationMemorizingCallback extends InvocationHandler {
-  var _invoked:String = ""
+  private var _invoked:String = ""
   def invokedPath = _invoked
   def invoke(proxy:AnyRef,method:java.lang.reflect.Method,args:Array[AnyRef]) = {
     _invoked = method.getName
