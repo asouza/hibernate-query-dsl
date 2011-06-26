@@ -40,6 +40,8 @@ class PimpedCriteria[T,P](prefix:String, val criteria: Criteria) {
 		new OrderThis[T,P](prefix + path, this)
 	}
 
+  def headOption:Option[P] = using(_.setMaxResults(1)).list.asInstanceOf[List[P]].headOption
+
   def join(field: String):Myself = criteria.createAlias(field, field)
 
   def join[Joiner](f:(T) => Joiner)(implicit entityType:Manifest[T]) = {
