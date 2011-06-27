@@ -47,7 +47,7 @@ class PimpedCriteria[T,P](prefix:String, val criteria: Criteria) {
 		new OrderThis[T,Proj](path, new PimpedCriteria[T,Proj]("", criteria))
   }
 
-  def headOption:Option[P] = using(_.setMaxResults(1)).list.asInstanceOf[List[P]].headOption
+  def headOption:Option[P] = using(_.setMaxResults(1)).list.toList.asInstanceOf[List[P]].headOption
 
   def join(field: String):Myself = criteria.createAlias(field, field)
 
