@@ -10,8 +10,7 @@ trait Cond {
 class EqCond(field:String, value:Any) extends Cond {
   def crit = Restrictions.eq(field, value)
 }
-// TODO extract list interface so we dont need the cases,
-// can simply return the list and thats it
+
 class ActiveCollection[T](var elements:List[T], query:PimpedCriteria[T,T])(implicit entityType:Manifest[T]) {
 
   private type Myself = ActiveCollection[T]

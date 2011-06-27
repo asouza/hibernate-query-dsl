@@ -7,6 +7,8 @@ import org.hibernate.transform.Transformers
 import org.hibernate.{Session, Criteria}
 import net.sf.cglib.proxy.Enhancer
 import scala.collection.JavaConversions._
+import javax.persistence.criteria.Path
+
 /**
  * A criteria that will query on objects of type T, projecting
  * on type P. This criteria is backed by a hibernate criteria.
@@ -39,6 +41,11 @@ class PimpedCriteria[T,P](prefix:String, val criteria: Criteria) {
     val path = evaluate(f)
 		new OrderThis[T,P](prefix + path, this)
 	}
+
+  def orderBy2[Proj](f:(Proj) => Unit)(implicit manifest:Manifest[Proj]) = {
+    val path = evaluate(f)
+		new OrderThis[T,Proj](path, new PimpedCriteria[T,Proj]("", criteria))
+  }
 
   def headOption:Option[P] = using(_.setMaxResults(1)).list.asInstanceOf[List[P]].headOption
 
