@@ -32,7 +32,7 @@ class PimpedCriteria[T,P](prefix:String, val criteria: Criteria) {
 
   def using(f:(Criteria) => Criteria):Myself = f(criteria)
 
-  def list:java.util.List[P] = asList[P]
+  def list:List[P] = asList[P]
 
   def orderBy(order: Order):Myself = criteria.addOrder(order)
 
