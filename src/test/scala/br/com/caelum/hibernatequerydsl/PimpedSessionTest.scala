@@ -10,6 +10,7 @@ import org.hibernate.criterion.Order._
 import org.junit.{ Test, Before, After }
 import org.junit.Assert._
 import scala.reflect.Code._
+import br.com.caelum.hibernatequerydsl.TypeUnsafe._
 
 class PimpedClassTest {
 
