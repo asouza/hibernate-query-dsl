@@ -6,11 +6,11 @@ import org.hibernate.criterion.{Criterion, Restrictions}
 
 trait Cond {
   def crit:Criterion
-  def filter(obj:Object):Boolean
+  def filter(obj:Any):Boolean
 }
-class EqCond(field:String, value:Object) extends Cond {
+class EqCond(field:String, value:Any) extends Cond {
   def crit = Restrictions.eq(field, value)
-  def filter(obj:Object) = (true)
+  def filter(obj:Any) = (true)
 }
 // TODO extract list interface so we dont need the cases,
 // can simply return the list and thats it

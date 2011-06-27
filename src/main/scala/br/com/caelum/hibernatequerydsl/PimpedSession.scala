@@ -63,17 +63,17 @@ class PimpedCode[T](code: Code[T]) {
   
   override def toString = evaluate
   
-  def equal(value: Object) = Restrictions.eq(evaluate, value)
+  def equal(value: Any) = Restrictions.eq(evaluate, value)
 
-  def >(value: Object) = Restrictions.gt(evaluate, value)
+  def >(value: Any) = Restrictions.gt(evaluate, value)
 
-  def >=(value: Object) = Restrictions.ge(evaluate, value)
+  def >=(value: Any) = Restrictions.ge(evaluate, value)
 
-  def <(value: Object) = Restrictions.lt(evaluate, value)
+  def <(value: Any) = Restrictions.lt(evaluate, value)
 
-  def <=(value: Object) = Restrictions.le(evaluate, value)
+  def <=(value: Any) = Restrictions.le(evaluate, value)
   
-  def !==(value: Object) = Restrictions.ne(evaluate,value)
+  def !==(value: Any) = Restrictions.ne(evaluate,value)
 
   def like(value: String) = Restrictions.ilike(evaluate, value, MatchMode.ANYWHERE)
 
@@ -89,17 +89,17 @@ class PimpedCode[T](code: Code[T]) {
 }
 
 class PimpedStringCondition(field: String) {
-  def equal(value: Object) = Restrictions.eq(field, value)
+  def equal(value: Any) = Restrictions.eq(field, value)
 
-  def >(value: Object) = Restrictions.gt(field, value)
+  def >(value: Any) = Restrictions.gt(field, value)
 
-  def >=(value: Object) = Restrictions.ge(field, value)
+  def >=(value: Any) = Restrictions.ge(field, value)
 
-  def <(value: Object) = Restrictions.lt(field, value)
+  def <(value: Any) = Restrictions.lt(field, value)
 
-  def <=(value: Object) = Restrictions.le(field, value)
+  def <=(value: Any) = Restrictions.le(field, value)
   
-  def !==(value: Object) = Restrictions.ne(field,value)
+  def !==(value: Any) = Restrictions.ne(field,value)
 
   def like(value: String) = Restrictions.ilike(field, value, MatchMode.ANYWHERE)
 
@@ -116,7 +116,7 @@ class PimpedStringCondition(field: String) {
 }
 
 class StringConditioner(field: String) {
-  def equal(value: Object) = new EqCond(field, value)
+  def equal(value: Any) = new EqCond(field, value)
 }
 
 class PimpedSession(session: Session) {
