@@ -83,4 +83,11 @@ class TypeSafeAcceptanceTest {
     assertEquals("alberto", addresses.get(0).getUser.getName)
   }
 
+  @Test
+  def shouldSupportComingBackFromTheOtherGuys {
+    withUser("guilherme", 29, "Vergueiro").and("guilherme", 26, "Paulista")
+    val addresses = session.from[Address].join(_.getUser).where("user.name" equal "guilherme").orderBy2[Address](_.getStreet).asc.list
+    assertEquals(26, addresses.get(0).getUser.getAge)
+  }
+
 }
