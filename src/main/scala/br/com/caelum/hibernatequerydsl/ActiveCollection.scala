@@ -7,7 +7,7 @@ import org.hibernate.criterion.{Criterion, Restrictions}
 trait Cond {
   def crit:Criterion
 }
-class EqCond(field:String, value:Object) extends Cond {
+class EqCond(field:String, value:Any) extends Cond {
   def crit = Restrictions.eq(field, value)
 }
 // TODO extract list interface so we dont need the cases,

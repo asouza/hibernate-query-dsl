@@ -292,7 +292,7 @@ class PimpedClassTest {
     val address4 = newAddress("y", alberto4)
     val list = session.from[User].join(lift(userToQuery.getAddresses)).groupBy("addresses.street").avg(lift(userToQuery.getAge)).asList[Array[Object]]
     assertEquals(2, list size)
-    assertEquals(15.0, list.get(0)(1))
+    assertEquals(15.0, list.head(1))
   }
 
   @Test
@@ -307,7 +307,7 @@ class PimpedClassTest {
     val address4 = newAddress("y", alberto4)
     val list = session.from[User].join(lift(userToQuery.getAddresses)).groupBy("addresses.street").sum(lift(userToQuery.getAge)).asList[Array[Object]]
     assertEquals(2, list size)
-    assertEquals(30L, list.get(0)(1))
+    assertEquals(30L, list.head(1))
   }
 
   @Test
@@ -322,7 +322,7 @@ class PimpedClassTest {
     val address4 = newAddress("y", alberto4)
     val list = session.from[User].join(lift(userToQuery.getAddresses)).groupBy("addresses.street").count(lift(userToQuery.getAge)).asList[Array[Object]]
     assertEquals(2, list size)
-    assertEquals(2L, list.get(0)(1))
+    assertEquals(2L, list.head(1))
   }
 
   @Test
@@ -376,7 +376,7 @@ class PimpedClassTest {
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
     val list = session.from[User].select(lift(userToQuery.getName)).asList[String]
-    assertEquals("alberto", list.get(0))
+    assertEquals("alberto", list.head)
   }
 
   @Test
@@ -400,6 +400,6 @@ class PimpedClassTest {
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
     val list = session.from[User].join(lift(userToQuery.getAddresses)).select(lift(userToQuery.getName)).selectWithAliases("addresses.street".alias("street")).transformToBean[StreetWithName].asList
-    assertEquals("alberto", list.get(0).getName)
+    assertEquals("alberto", list.head.getName)
   }
 }

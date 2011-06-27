@@ -6,7 +6,7 @@ import org.hibernate.impl.CriteriaImpl
 import org.hibernate.transform.Transformers
 import org.hibernate.{Session, Criteria}
 import net.sf.cglib.proxy.Enhancer
-
+import scala.collection.JavaConversions._
 /**
  * A criteria that will query on objects of type T, projecting
  * on type P. This criteria is backed by a hibernate criteria.
@@ -26,7 +26,7 @@ class PimpedCriteria[T,P](prefix:String, val criteria: Criteria) {
 
   def unique[Y]: Y = criteria.uniqueResult.asInstanceOf[Y]
 
-  def asList[Y]: java.util.List[Y] = criteria.list.asInstanceOf[java.util.List[Y]]
+  def asList[Y]: List[Y] = criteria.list.asInstanceOf[java.util.List[Y]].toList
 
   def using(f:(Criteria) => Criteria):Myself = f(criteria)
 

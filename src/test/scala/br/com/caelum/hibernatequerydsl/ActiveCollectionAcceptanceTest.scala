@@ -6,7 +6,6 @@ import org.junit.{Test, After, Before}
 import org.junit.Assert._
 import br.com.caelum.hibernatequerydsl.PimpedSession._
 import br.com.caelum.hibernatequerydsl.TypeSafe._
-
 class ActiveCollectionAcceptanceTest {
 
   private var session:Session = _
