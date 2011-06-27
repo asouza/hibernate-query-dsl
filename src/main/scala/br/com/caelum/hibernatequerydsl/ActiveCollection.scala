@@ -6,11 +6,9 @@ import org.hibernate.criterion.{Criterion, Restrictions}
 
 trait Cond {
   def crit:Criterion
-  def filter(obj:Object):Boolean
 }
 class EqCond(field:String, value:Object) extends Cond {
   def crit = Restrictions.eq(field, value)
-  def filter(obj:Object) = (true)
 }
 // TODO extract list interface so we dont need the cases,
 // can simply return the list and thats it
@@ -30,27 +28,15 @@ class ActiveCollection[T](var elements:List[T], query:PimpedCriteria[T,T])(impli
   }
 
   def take(k: Int):Myself = {
-    loaded match {
-      case (false) => query.using(_.setMaxResults(k))
-      case (true) => new Myself(elements.take(k), null)
-    }
+    query.using(_.setMaxResults(k))
   }
 
   def filter(f: (T) => Cond):Myself = {
-    loaded match {
-      case (false) => query.and(applyRule(f).crit)
-      case (true) => elements.filter(toB(f))
-    }
+    query.and(applyRule(f).crit)
   }
 
   def find(f: (T) => Cond): Option[T] = {
-    loaded match {
-      case (false) => query.and(applyRule(f).crit).using(_.setMaxResults(1)).headOption
-      case (true) => elements.find(toB(f))
-    }
-  }
-  def toB(f:(T) => Cond):((T) => Boolean) = {
-    throw new RuntimeException("going through the list")
+    query.and(applyRule(f).crit).using(_.setMaxResults(1)).headOption
   }
 
   def applyRule(f: (T) => Cond):Cond = {
