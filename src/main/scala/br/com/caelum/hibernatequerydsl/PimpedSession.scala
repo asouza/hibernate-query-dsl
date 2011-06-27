@@ -10,8 +10,6 @@ object PimpedSession {
 
   implicit def pimpedCriteria2Criteria[T,P](pimped: PimpedCriteria[T,P]) = pimped.criteria
 
-  implicit def string2PimpedStringCondition(field: String) = new PimpedStringCondition(field)
-
   implicit def hibernateQuery2PimpedQuery(query: Query) = new PimpedQuery(query)
   
   implicit def code2PimpedCode[T](code:Code[T]) = new PimpedCode(code)
@@ -19,6 +17,19 @@ object PimpedSession {
   implicit def code2String[T](code:Code[T]) = new PimpedCode(code).toString  
 
   implicit def orderThisToPimped[T,P](order:OrderThis[T,P]) = order.asc
+
+  implicit def collectionToActive[T](elements:List[T], criteria:PimpedCriteria[T,T])(implicit t:Manifest[T]) = new ActiveCollection[T](elements, criteria)
+
+  implicit def acToList[T](ac:ActiveCollection[T]) = ac.grabThem
+
+}
+
+object TypeUnsafe {
+  implicit def string2PimpedStringCondition(field: String) = new PimpedStringCondition(field)
+}
+object TypeSafe {
+  implicit def string2Conditioner(field: String) = new StringConditioner(field)
+
 }
 
 class PimpedCode[T](code: Code[T]) {
@@ -77,19 +88,6 @@ class PimpedCode[T](code: Code[T]) {
   def alias(newName: String) = Projections.property(evaluate).as(newName)  
 }
 
-class PimpedQuery(query: Query) {
-  def withParams(params: (String, Object)*) = {
-    params.foreach((param) => {
-      query.setParameter(param._1, param._2)
-    })
-    query
-  }
-
-  def unique[T]: T = query.uniqueResult.asInstanceOf[T]
-
-  def asList[T]: java.util.List[T] = query.list.asInstanceOf[java.util.List[T]]
-}
-
 class PimpedStringCondition(field: String) {
   def equal(value: Object) = Restrictions.eq(field, value)
 
@@ -115,6 +113,10 @@ class PimpedStringCondition(field: String) {
 
   def alias(newName: String) = Projections.property(field).as(newName)
 
+}
+
+class StringConditioner(field: String) {
+  def equal(value: Object) = new EqCond(field, value)
 }
 
 class PimpedSession(session: Session) {
