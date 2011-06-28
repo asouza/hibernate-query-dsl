@@ -46,8 +46,8 @@ class TypeSafeAcceptanceTest {
   def shouldListAllObjects {
     withUser("guilherme").and("alberto")
     val users = session.from[User].orderBy(_.getName).asc.list
-    assertEquals("alberto", users.get(0).getName)
-    assertEquals("guilherme", users.get(1).getName)
+    assertEquals("alberto", users.head.getName)
+    assertEquals("guilherme", users(1).getName)
   }
 
 
@@ -55,24 +55,24 @@ class TypeSafeAcceptanceTest {
   def shouldSupportComingBackToCriteriaAndAgainToPimped {
     withUser("guilherme").and("alberto")
     val users = session.from[User].orderBy(_.getName).asc.using(_.setMaxResults(1)).list
-    assertEquals("alberto", users.get(0).getName)
-    assertEquals(1, users.size())
+    assertEquals("alberto", users.head.getName)
+    assertEquals(1, users.size)
   }
 
   @Test
   def shouldSupportOrderingByTwoElements {
     withUser("guilherme", 16).and("guilherme", 20)
     val users = session.from[User].orderBy(_.getName).asc.orderBy(_.getAge).desc.list
-    assertEquals(20, users.get(0).getAge)
-    assertEquals(16, users.get(1).getAge)
+    assertEquals(20, users.head.getAge)
+    assertEquals(16, users(1).getAge)
   }
 
   @Test
   def shouldSupportTypeSafeJoining {
     withUser("guilherme", 29, "street 1").and("alberto", 26, "street 2")
     val addresses = session.from[Address].join(_.getUser).where("user.name" equal "guilherme").list
-    assertEquals(29, addresses.get(0).getUser.getAge)
-    assertEquals(1, addresses.size())
+    assertEquals(29, addresses.head.getUser.getAge)
+    assertEquals(1, addresses.size)
   }
 
 
@@ -80,14 +80,14 @@ class TypeSafeAcceptanceTest {
   def shouldSupportJoiningAndProjectingOnTheBaseObject {
     withUser("guilherme", 29, "street 1").and("alberto", 26, "street 2")
     val addresses = session.from[Address].join(_.getUser).orderBy(_.getName).list
-    assertEquals("alberto", addresses.get(0).getUser.getName)
+    assertEquals("alberto", addresses.head.getUser.getName)
   }
 
   @Test
   def shouldSupportComingBackFromTheOtherGuys {
     withUser("guilherme", 29, "Vergueiro").and("guilherme", 26, "Paulista")
     val addresses = session.from[Address].join(_.getUser).where("user.name" equal "guilherme").orderBy2[Address](_.getStreet).asc.list
-    assertEquals(26, addresses.get(0).getUser.getAge)
+    assertEquals(26, addresses.head.getUser.getAge)
   }
 
 }
