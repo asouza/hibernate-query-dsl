@@ -7,7 +7,6 @@ import org.hibernate.transform.Transformers
 import org.hibernate.{Session, Criteria}
 import net.sf.cglib.proxy.Enhancer
 import scala.collection.JavaConversions._
-import javax.persistence.criteria.Path
 
 /**
  * A criteria that will query on objects of type T, projecting
@@ -32,7 +31,7 @@ class PimpedCriteria[T,P](prefix:String, val criteria: Criteria) {
 
   def using(f:(Criteria) => Criteria):Myself = f(criteria)
 
-  def list:java.util.List[P] = asList[P]
+  def list:List[P] = asList[P]
 
   def orderBy(order: Order):Myself = criteria.addOrder(order)
 
