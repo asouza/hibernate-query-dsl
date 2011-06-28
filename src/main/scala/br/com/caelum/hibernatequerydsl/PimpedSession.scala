@@ -1,6 +1,7 @@
 package br.com.caelum.hibernatequerydsl
 
-import org.hibernate.{ Criteria, Session, Query }
+import conditions.EqCond
+import org.hibernate.{ Session, Query }
 import org.hibernate.criterion.{ Order, Restrictions, MatchMode, Projections }
 import scala.reflect.{Apply, Select, Literal, Tree,Code,This }
 import java.io.Serializable
@@ -19,7 +20,7 @@ object PimpedSession {
 
   implicit def orderThisToPimped[T,P](order:OrderThis[T,P]) = order.asc
 
-  implicit def collectionToActive[T](elements:List[T], criteria:PimpedCriteria[T,T])(implicit t:Manifest[T]) = new ActiveCollection[T](elements, criteria)
+  implicit def criteriaToActive[T](criteria:PimpedCriteria[T,T])(implicit t:Manifest[T]) = new ActiveCollection[T](null, criteria)
 
   implicit def acToList[T](ac:ActiveCollection[T]) = ac.grabThem
 
@@ -29,7 +30,7 @@ object TypeUnsafe {
   implicit def string2PimpedStringCondition(field: String) = new PimpedStringCondition(field)
 }
 object TypeSafe {
-  implicit def string2Conditioner(field: String) = new StringConditioner(field)
+  implicit def any2Conditioner(field: Any) = new AnyConditioner(field)
 
 }
 
@@ -116,8 +117,19 @@ class PimpedStringCondition(field: String) {
 
 }
 
-class StringConditioner(field: String) {
-  def equal(value: Any) = new EqCond(field, value)
+object Hacker {
+  private val _field = new ThreadLocal[String]();
+  def field = {
+    val x = _field.get
+    _field.remove
+    x
+  }
+  def uses(x:String) {
+    _field.set(x)
+  }
+}
+class AnyConditioner(x: Any) {
+  def equal(value: Any) = new EqCond(Hacker.field, value)
 }
 
 class PimpedSession(session: Session) {

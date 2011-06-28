@@ -1,18 +1,11 @@
 package br.com.caelum.hibernatequerydsl
 
-import scala.collection.JavaConversions._
-import net.sf.cglib.proxy.Enhancer
-import org.hibernate.criterion.{Criterion, Restrictions}
-
-trait Cond {
-  def crit:Criterion
-}
-class EqCond(field:String, value:Any) extends Cond {
-  def crit = Restrictions.eq(field, value)
-}
+import conditions.Cond
+import org.hibernate.criterion.Restrictions
 
 class ActiveCollection[T](var elements:List[T], query:PimpedCriteria[T,T])(implicit entityType:Manifest[T]) {
 
+  import Cond.applyRule
   private type Myself = ActiveCollection[T]
   private type Condition = (T) => Cond
   private def loaded = Option(elements).isDefined
@@ -39,22 +32,28 @@ class ActiveCollection[T](var elements:List[T], query:PimpedCriteria[T,T])(impli
     grabThem.dropWhile(f)
   }
 
-  def exists(f: Condition):Boolean = {
-    find(f).isDefined
-  }
+  def exists(f: Condition) = find(f).isDefined
 
   def filter(f: Condition):Myself = {
     query.and(applyRule(f).crit)
   }
 
+  def filterNot(f: Condition):Myself = query.and(Restrictions.not(applyRule(f).crit))
+
   def find(f: Condition): Option[T] = {
     query.and(applyRule(f).crit).using(_.setMaxResults(1)).headOption
   }
 
-  def applyRule(f: Condition):Cond = {
-    val handler = new ComparisonCallback
-    val proxy = Enhancer.create(entityType.erasure, handler).asInstanceOf[T]
-    f(proxy)
+  def apply(n:Int) = take(1).drop(n)
+
+  def count(f: Condition) = {
+    filter(f)
+    query.count
   }
+
+  def head = query.headOption.get
+  def length = query.count
+  def size = length
+  def tail:List[T] = drop(1).grabThem
 
 }

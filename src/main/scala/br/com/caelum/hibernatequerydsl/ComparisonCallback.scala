@@ -20,7 +20,8 @@ class ComparisonCallback extends InvocationHandler {
     }
     val rest = if (_invoked.length() > 0) _invoked.substring(1,_invoked.length()) else ""
     _invoked = Character.toLowerCase(_invoked.charAt(0)) + rest
-    _invoked
+    Hacker.uses(_invoked)
+    null
   }
 
 }
