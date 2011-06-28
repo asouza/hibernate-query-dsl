@@ -3,6 +3,7 @@ package br.com.caelum.hibernatequerydsl
 import org.hibernate.{ Criteria, Session, Query }
 import org.hibernate.criterion.{ Order, Restrictions, MatchMode, Projections }
 import scala.reflect.{Apply, Select, Literal, Tree,Code,This }
+import java.io.Serializable
 
 object PimpedSession {
 	
@@ -139,12 +140,12 @@ class PimpedSession(session: Session) {
   def first[T](implicit manifest: Manifest[T]) = from[T].first[T]
 
   def last[T](implicit manifest: Manifest[T]) = from[T].last[T]
+
+  def load[T](implicit manifest: Manifest[T], id:Serializable) = {
+    session.load(manifest.erasure, id).asInstanceOf[T]
+  }
+
 }
 
 
-class Transformer[T,P](criteria: Criteria) {
-  def asList = new PimpedCriteria[T,P]("", criteria).asList[T]
-  
-  def unique = new PimpedCriteria[T,P]("", criteria).unique[T]
-}
 
