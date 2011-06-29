@@ -16,6 +16,7 @@ class PimpedQuery(query: Query) {
   def asList[T]: List[T] = query.list.asInstanceOf[java.util.List[T]].toList
 
   def headOption[T]:Option[T] = {
-    query.setMaxResults(1).list.asInstanceOf[List[T]].headOption
+    query.setMaxResults(1)
+    asList[T].headOption
   }
 }

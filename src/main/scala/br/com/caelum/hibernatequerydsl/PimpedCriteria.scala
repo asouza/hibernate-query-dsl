@@ -7,7 +7,6 @@ import org.hibernate.transform.Transformers
 import org.hibernate.{Session, Criteria}
 import net.sf.cglib.proxy.Enhancer
 import scala.collection.JavaConversions._
-import javax.persistence.criteria.Path
 
 /**
  * A criteria that will query on objects of type T, projecting
