@@ -72,7 +72,7 @@ class ActiveCollectionAcceptanceTest {
   def shouldSupportDroppingSomething {
     withUser("guilherme", 29).and("alberto").and("guilherme", 30)
     val users = ar.filter(_.getName equal "guilherme").drop(1)
-    assertEquals(30, users.get(0).getAge)
+    assertEquals(30, users.head.getAge)
   }
 
 

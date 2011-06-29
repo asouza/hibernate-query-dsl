@@ -2,7 +2,6 @@ package br.com.caelum.hibernatequerydsl
 
 import org.hibernate.{Criteria, Session, Query}
 import org.hibernate.criterion.{Order, Restrictions, MatchMode, Projections}
-import scala.reflect.Code
 
 import java.io.Serializable
 
@@ -13,10 +12,6 @@ object PimpedSession {
   implicit def pimpedCriteria2Criteria[T, P](pimped: PimpedCriteria[T, P]) = pimped.criteria
 
   implicit def hibernateQuery2PimpedQuery(query: Query) = new PimpedQuery(query)
-
-  implicit def code2PimpedCode[T](code: Code[T]) = new PimpedCode(code)
-
-  implicit def code2String[T](code: Code[T]) = new PimpedCode(code).toString
 
   implicit def orderThisToPimped[T, P](order: OrderThis[T, P]) = order.asc
 

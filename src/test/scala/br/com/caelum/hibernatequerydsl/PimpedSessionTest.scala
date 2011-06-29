@@ -9,7 +9,6 @@ import org.hibernate.Session
 import org.hibernate.criterion.Order._
 import org.junit.{ Test, Before, After }
 import org.junit.Assert._
-import scala.reflect.Code._
 import br.com.caelum.hibernatequerydsl.TypeSafeCondition._
 
 class PimpedClassTest {
@@ -377,7 +376,7 @@ class PimpedClassTest {
     val address = newAddress("x", alberto)
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
-    val list = session.from[User].select(lift(userToQuery.getName)).asList[String]
+    val list = session.from[User].select("name").asList[String]
     assertEquals("alberto", list.head)
   }
 
@@ -401,7 +400,7 @@ class PimpedClassTest {
     val address = newAddress("x", alberto)
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
-    val list = session.from[User].join(_.getAddresses).select(lift(userToQuery.getName)).selectWithAliases("addresses.street".alias("street")).transformToBean[StreetWithName].asList
+    val list = session.from[User].join(_.getAddresses).select("name").selectWithAliases("addresses.street".alias("street")).transformToBean[StreetWithName].asList
     assertEquals("alberto", list.head.getName)
   }
 }
