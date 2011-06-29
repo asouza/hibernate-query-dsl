@@ -25,14 +25,12 @@ val address = new Address
     val addresses = session.from[Address].join(_.getUser).orderBy(_.getName).list
     val addresses = session.from[Address].join(_.getUser).where("user.name" equal "guilherme").list
 
-	session.from[User].orderBy(lift(user.getName).asc).orderBy(lift(user.getAge).desc).asList[User]
+	session.from[User].orderBy(_.getName).asc.orderBy(_.getAge).desc.asList[User]
 
-	session.from[User].where(lift(user.getAge) >= 20).and(lift(user.getName) like "alberto").asList[User]
+	session.from[User].where(_.getAge \>= 20).where(_.getName like "alberto").asList[User]
 
-	session.from[Address].join(lift(address.getUser)).where(lift(address.getUser.getName) equal "alberto2").asList[Address]
-
-	session.from[Address].join(lift(address.getUser)).where(lift(address.getUser.getName) equal "alberto2").and(lift(address.getUser.getAge) >= 20).asList[Address]
+	session.from[Address].join(_.getUser).where(_.getName equal "alberto2").asList[Address]
 
 	session.query("from User where name=:name and age =:age").withParams("name" -> "alberto","age" -> alberto.getAge).asList[User]
 
-	session.from[User].where.hasMany(lift(user.getAddresses)).asList[User]
+	session.from[User].where.hasMany(_.getAddresses).asList[User]
