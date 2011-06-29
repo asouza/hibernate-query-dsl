@@ -30,19 +30,26 @@ class DeletableQuery[T](session:Session)(implicit entityType:Manifest[T]) {
   private type Myself = DeletableQuery[T]
   private type Condition = (T) => Cond
   private var query = "from " + entityType.erasure.getName
-  private val params = Map[String, Any]()
+  private val params = scala.collection.mutable.Map[String, Any]()
 
   def find(f: Condition): Option[T] = {
     filter(f)
     val q = createQuery("select")
     new PimpedQuery(q.setMaxResults(1)).headOption
   }
+
   def filter(f: Condition) = {
     val rule = applyRule(f)
+    if(params.isEmpty) {
+      query += " where "
+    } else {
+      query += " and "
+    }
     query += rule.content
-    params.add(rule.params)
+    params.put(rule.params._1, rule.params._2)
     this
   }
+
   def delete = createQuery("delete").executeUpdate
 
   private def createQuery(prefix:String) = {

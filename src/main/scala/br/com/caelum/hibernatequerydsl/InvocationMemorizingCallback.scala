@@ -1,6 +1,7 @@
 package br.com.caelum.hibernatequerydsl
 
 import net.sf.cglib.proxy.InvocationHandler
+import java.lang.Boolean
 
 class InvocationMemorizingCallback extends InvocationHandler {
   private var _invoked:String = ""
@@ -15,6 +16,12 @@ class InvocationMemorizingCallback extends InvocationHandler {
     }
     val rest = if (_invoked.length() > 0) _invoked.substring(1,_invoked.length()) else ""
     _invoked = Character.toLowerCase(_invoked.charAt(0)) + rest
-    null
+    if(method.getReturnType==Char.getClass) {
+      ' '.asInstanceOf[AnyRef]
+    } else if(method.getReturnType.isPrimitive) {
+      0.asInstanceOf[AnyRef]
+    } else {
+      null
+    }
   }
 }

@@ -44,16 +44,12 @@ class ActiveCollection[T](var elements:List[T], query:PimpedCriteria[T,T])(impli
     query.and(applyRule(f).crit).using(_.setMaxResults(1)).headOption
   }
 
-  def apply(n:Int) = take(1).drop(n)
-
   def count(f: Condition) = {
     filter(f)
     query.count
   }
 
   def head = query.headOption.get
-  def length = query.count
-  def size = length
   def tail:List[T] = drop(1).grabThem
 
 }

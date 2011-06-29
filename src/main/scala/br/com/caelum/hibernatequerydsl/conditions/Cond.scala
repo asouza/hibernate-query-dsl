@@ -21,7 +21,7 @@ trait Cond {
 class EqCond(field:String, value:Any) extends Cond {
   def crit = Restrictions.eq(field, value)
   def content = field + " = :" + field
-  def params = ":" + field -> value
+  def params = field -> value
 }
 
 
