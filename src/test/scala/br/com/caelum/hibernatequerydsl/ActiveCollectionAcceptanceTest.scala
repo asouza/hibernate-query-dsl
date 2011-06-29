@@ -60,6 +60,30 @@ class ActiveCollectionAcceptanceTest {
     assertEquals(1, users.size)
   }
 
+
+  @Test
+  def shouldSupportFindingAnElement {
+    withUser("guilherme", 29).and("alberto").and("guilherme", 30)
+    val users = ar.find(_.getName equal "guilherme")
+    assertEquals(29, users.get.getAge)
+  }
+
+  @Test
+  def shouldSupportDroppingSomething {
+    withUser("guilherme", 29).and("alberto").and("guilherme", 30)
+    val users = ar.filter(_.getName equal "guilherme").drop(1)
+    assertEquals(30, users.get(0).getAge)
+  }
+
+
+
+  @Test
+  def shouldSupportCheckingIfAnElementExists {
+    withUser("guilherme").and("alberto")
+    assertTrue(ar.exists(_.getName equal "alberto"))
+    assertFalse(ar.exists(_.getName equal "marcos"))
+  }
+
   @Test
   def shouldSupportGrabbingAll {
     withUser("guilherme").and("alberto")

@@ -1,33 +1,35 @@
 package br.com.caelum.hibernatequerydsl
 
-import org.hibernate.{ Criteria, Session, Query }
-import org.hibernate.criterion.{ Order, Restrictions, MatchMode, Projections }
+import org.hibernate.{Criteria, Session, Query}
+import org.hibernate.criterion.{Order, Restrictions, MatchMode, Projections}
 import scala.reflect.Code
 
+import java.io.Serializable
 
 object PimpedSession {
-	
+
   implicit def session2PimpedSession(session: Session) = new PimpedSession(session)
 
-  implicit def pimpedCriteria2Criteria[T,P](pimped: PimpedCriteria[T,P]) = pimped.criteria
+  implicit def pimpedCriteria2Criteria[T, P](pimped: PimpedCriteria[T, P]) = pimped.criteria
 
   implicit def hibernateQuery2PimpedQuery(query: Query) = new PimpedQuery(query)
-  
-  implicit def code2PimpedCode[T](code:Code[T]) = new PimpedCode(code)
-  
-  implicit def code2String[T](code:Code[T]) = new PimpedCode(code).toString  
 
-  implicit def orderThisToPimped[T,P](order:OrderThis[T,P]) = order.asc
+  implicit def code2PimpedCode[T](code: Code[T]) = new PimpedCode(code)
 
-  implicit def collectionToActive[T](elements:List[T], criteria:PimpedCriteria[T,T])(implicit t:Manifest[T]) = new ActiveCollection[T](elements, criteria)
+  implicit def code2String[T](code: Code[T]) = new PimpedCode(code).toString
 
-  implicit def acToList[T](ac:ActiveCollection[T]) = ac.grabThem
+  implicit def orderThisToPimped[T, P](order: OrderThis[T, P]) = order.asc
+
+  implicit def collectionToActive[T](elements: List[T], criteria: PimpedCriteria[T, T])(implicit t: Manifest[T]) = new ActiveCollection[T](elements, criteria)
+
+  implicit def acToList[T](ac: ActiveCollection[T]) = ac.grabThem
 
 }
 
 object TypeUnsafe {
   implicit def string2PimpedStringCondition(field: String) = new PimpedStringCondition(field)
 }
+
 object TypeSafe {
   implicit def string2Conditioner(field: String) = new StringConditioner(field)
 }
@@ -40,7 +42,7 @@ class TypeSafeCriteriaCondition(proxy: InvocationMemorizingCallback) {
 
   val field = proxy.prefix + proxy.invokedPath
 
-  def \==(value:Any) = Restrictions.eq(field,value)
+  def \==(value: Any) = Restrictions.eq(field, value)
 
   def \>(value: Any) = Restrictions.gt(field, value)
 
@@ -50,7 +52,7 @@ class TypeSafeCriteriaCondition(proxy: InvocationMemorizingCallback) {
 
   def \<=(value: Any) = Restrictions.le(field, value)
 
-  def \!=(value: Any) = Restrictions.ne(field,value)
+  def \!=(value: Any) = Restrictions.ne(field, value)
 
   def like(value: String) = Restrictions.ilike(field, value, MatchMode.ANYWHERE)
 
@@ -72,8 +74,8 @@ class PimpedStringCondition(field: String) {
   def <(value: Any) = Restrictions.lt(field, value)
 
   def <=(value: Any) = Restrictions.le(field, value)
-  
-  def !==(value: Any) = Restrictions.ne(field,value)
+
+  def !==(value: Any) = Restrictions.ne(field, value)
 
   def like(value: String) = Restrictions.ilike(field, value, MatchMode.ANYWHERE)
 
@@ -95,13 +97,13 @@ class StringConditioner(field: String) {
 
 class PimpedSession(session: Session) {
 
-  def all[T](implicit manifest:Manifest[T]) = {
+  def all[T](implicit manifest: Manifest[T]) = {
     from[T].list
   }
 
   def from[T](implicit manifest: Manifest[T]) = {
     val criteria = session.createCriteria(manifest.erasure)
-	  new PimpedCriteria[T,T]("", criteria)
+    new PimpedCriteria[T, T]("", criteria)
   }
 
   def query(query: String) = session.createQuery(query)
@@ -113,12 +115,12 @@ class PimpedSession(session: Session) {
   def first[T](implicit manifest: Manifest[T]) = from[T].first[T]
 
   def last[T](implicit manifest: Manifest[T]) = from[T].last[T]
+
+  def load[T](implicit manifest: Manifest[T], id: Serializable) = {
+    session.load(manifest.erasure, id).asInstanceOf[T]
+  }
+
 }
 
 
-class Transformer[T,P](criteria: Criteria) {
-  def asList = new PimpedCriteria[T,P]("", criteria).asList[T]
-  
-  def unique = new PimpedCriteria[T,P]("", criteria).unique[T]
-}
 
