@@ -291,7 +291,7 @@ class PimpedClassTest {
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
     val address4 = newAddress("y", alberto4)
-    val list = session.from[User].join(_.getAddresses).groupBy("addresses.street").avg(lift(userToQuery.getAge)).asList[Array[Object]]
+    val list = session.from[User].join(_.getAddresses).groupBy("addresses.street").avg[User](_.getAge).asList[Array[Object]]
     assertEquals(2, list size)
     assertEquals(15.0, list.head(1))
   }
@@ -306,7 +306,7 @@ class PimpedClassTest {
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
     val address4 = newAddress("y", alberto4)
-    val list = session.from[User].join(_.getAddresses).groupBy("addresses.street").sum(lift(userToQuery.getAge)).asList[Array[Object]]
+    val list = session.from[User].join(_.getAddresses).groupBy("addresses.street").sum[User](_.getAge).asList[Array[Object]]
     assertEquals(2, list size)
     assertEquals(30L, list.head(1))
   }
@@ -321,7 +321,7 @@ class PimpedClassTest {
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
     val address4 = newAddress("y", alberto4)
-    val list = session.from[User].join(_.getAddresses).groupBy("addresses.street").count(lift(userToQuery.getAge)).asList[Array[Object]]
+    val list = session.from[User].join(_.getAddresses).groupBy("addresses.street").count[User](_.getAge).asList[Array[Object]]
     assertEquals(2, list size)
     assertEquals(2L, list.head(1))
   }
@@ -336,36 +336,37 @@ class PimpedClassTest {
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
 
-    val list = session.from[User].where.has(lift(userToQuery.getAddresses)).asList[User]
+    val list = session.from[User].where.has(_.getAddresses).asList[User]
     assertEquals(3, list size)
   }
 
-//  @Test
-//  def shouldListJustUsersWithAddressesFilteringBySomeAttribute {
-//    val alberto = newUser("alberto", 10)
-//    val alberto2 = newUser("alberto2", 20)
-//    val alberto3 = newUser("alberto3", 15)
-//    val alberto4 = newUser("alberto4", 30)
-//    val address = newAddress("x", alberto)
-//    val address2 = newAddress("x", alberto2)
-//    val address3 = newAddress("y", alberto3)
-//
-//    val list = session.from[User].includes(lift(userToQuery.getAddresses)).where("addresses.street" equal "y").asList[User]
-//    assertEquals(1, list size)
-//  }
-//
-//  @Test
-//  def shouldListJustUsersWithAddressesFilteringBySomeAttribute2 {
-//    val alberto = newUser("alberto", 10)
-//    val alberto2 = newUser("alberto2", 20)
-//    val alberto3 = newUser("alberto3", 15)
-//    val alberto4 = newUser("alberto4", 30)
-//    val address = newAddress("x", alberto)
-//    val address2 = newAddress("x", alberto2)
-//    val address3 = newAddress("y", alberto3)
-//    val list = session.from[User].includes(lift(userToQuery.getAddresses)).where("addresses.street" equal "y").asList[User]
-//    assertEquals(1, list size)
-//  }
+  @Test
+  def shouldListJustUsersWithAddressesFilteringBySomeAttribute {
+    val alberto = newUser("alberto", 10)
+    val alberto2 = newUser("alberto2", 20)
+    val alberto3 = newUser("alberto3", 15)
+    val alberto4 = newUser("alberto4", 30)
+    val address = newAddress("x", alberto)
+    val address2 = newAddress("x", alberto2)
+    val address3 = newAddress("y", alberto3)
+    import br.com.caelum.hibernatequerydsl.TypeUnsafe._
+    val list = session.from[User].includes(_.getAddresses).where("addresses.street" equal "y").asList[User]
+    assertEquals(1, list size)
+  }
+
+  @Test
+  def shouldListJustUsersWithAddressesFilteringBySomeAttribute2 {
+    val alberto = newUser("alberto", 10)
+    val alberto2 = newUser("alberto2", 20)
+    val alberto3 = newUser("alberto3", 15)
+    val alberto4 = newUser("alberto4", 30)
+    val address = newAddress("x", alberto)
+    val address2 = newAddress("x", alberto2)
+    val address3 = newAddress("y", alberto3)
+    import br.com.caelum.hibernatequerydsl.TypeUnsafe._
+    val list = session.from[User].includes(_.getAddresses).where("addresses.street" equal "y").asList[User]
+    assertEquals(1, list size)
+  }
 
   @Test
   def shouldSelectByFields {
@@ -386,7 +387,7 @@ class PimpedClassTest {
     val alberto2 = newUser("alberto", 20)
     val alberto3 = newUser("alberto", 15)
     val alberto4 = newUser("alberto4", 30)
-    val list = session.from[User].distinct("name").asList[String]
+    val list = session.from[User].distinct(_.getName).asList[String]
     assertEquals(2, list.size)
   }
 
