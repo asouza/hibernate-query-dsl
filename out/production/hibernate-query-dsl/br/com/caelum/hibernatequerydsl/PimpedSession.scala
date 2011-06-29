@@ -29,10 +29,7 @@ object TypeUnsafe {
 }
 object TypeSafe {
   implicit def string2Conditioner(field: String) = new StringConditioner(field)
-}
 
-object TypeSafeCondition {
-  implicit def anything2TypeSafeCondition(qq: Any) = new TypeSafeCriteriaCondition(Pig.tl.get)
 }
 
 class PimpedCode[T](code: Code[T]) {
@@ -89,31 +86,6 @@ class PimpedCode[T](code: Code[T]) {
   def asc = Order.asc(evaluate)
 
   def alias(newName: String) = Projections.property(evaluate).as(newName)  
-}
-
-class TypeSafeCriteriaCondition(proxy: InvocationMemorizingCallback) {
-
-  val field = proxy.prefix + proxy.invokedPath
-
-  def \==(value:Any) = Restrictions.eq(field,value)
-
-  def \>(value: Any) = Restrictions.gt(field, value)
-
-  def \>=(value: Any) = Restrictions.ge(field, value)
-
-  def \<(value: Any) = Restrictions.lt(field, value)
-
-  def \<=(value: Any) = Restrictions.le(field, value)
-
-  def \!=(value: Any) = Restrictions.ne(field,value)
-
-  def like(value: String) = Restrictions.ilike(field, value, MatchMode.ANYWHERE)
-
-  def isNull = Restrictions.isNull(field)
-
-  def isNotNull = Restrictions.isNotNull(field)
-
-  def alias(newName: String) = Projections.property(field).as(newName)
 }
 
 

@@ -77,12 +77,8 @@ class PimpedCriteria[T,P](prefix:String, val criteria: Criteria) {
   
   def where:Myself = { this }
 
-  def where(f:(T) => Criterion)(implicit entityType:Manifest[T]):Myself = {
-    val handler = new InvocationMemorizingCallback(prefix)
-    val proxy = Enhancer.create(entityType.erasure, handler).asInstanceOf[T]
-    val condition = f(proxy)
-    //println(condition)
-    criteria.add(condition)
+  def where(f:(T) => Unit)(implicit entityType:Manifest[T]) {
+    val field = evaluate(f)
   }
 
   
