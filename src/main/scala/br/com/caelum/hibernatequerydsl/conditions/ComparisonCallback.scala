@@ -1,4 +1,4 @@
-package br.com.caelum.hibernatequerydsl
+package br.com.caelum.hibernatequerydsl.conditions
 
 import net.sf.cglib.proxy.InvocationHandler
 class ComparisonCallback extends InvocationHandler {

@@ -1,6 +1,6 @@
 package br.com.caelum.hibernatequerydsl
 
-import conditions.EqCond
+import conditions.{AnyConditioner, EqCond}
 import org.hibernate.{ Session, Query }
 import org.hibernate.criterion.{ Order, Restrictions, MatchMode, Projections }
 import scala.reflect.{Apply, Select, Literal, Tree,Code,This }
@@ -23,6 +23,12 @@ object PimpedSession {
   implicit def criteriaToActive[T](criteria:PimpedCriteria[T,T])(implicit t:Manifest[T]) = new ActiveCollection[T](null, criteria)
 
   implicit def acToList[T](ac:ActiveCollection[T]) = ac.grabThem
+
+  implicit def queryToList[T](query:TypeSafeQuery[T]) = query.list
+
+  implicit def sessionToQueriable(session: Session) = new {
+    def query[T](implicit manifest:Manifest[T]) = new TypeSafeQuery[T](session)(manifest)
+  }
 
 }
 
@@ -115,21 +121,6 @@ class PimpedStringCondition(field: String) {
 
   def alias(newName: String) = Projections.property(field).as(newName)
 
-}
-
-object Hacker {
-  private val _field = new ThreadLocal[String]();
-  def field = {
-    val x = _field.get
-    _field.remove
-    x
-  }
-  def uses(x:String) {
-    _field.set(x)
-  }
-}
-class AnyConditioner(x: Any) {
-  def equal(value: Any) = new EqCond(Hacker.field, value)
 }
 
 class PimpedSession(session: Session) {
