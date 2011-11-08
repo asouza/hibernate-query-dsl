@@ -1,10 +1,11 @@
 package br.com.caelum.hibernatequerydsl
 
-import conditions.{AnyConditioner, EqCond}
+import conditions.{EqCond, CriterionCond}
 import org.hibernate.{ Session, Query }
-import org.hibernate.criterion.{ Order, Restrictions, MatchMode, Projections }
 import scala.reflect.{Apply, Select, Literal, Tree,Code,This }
 import java.io.Serializable
+import org.hibernate.criterion._
+import br.com.caelum.hibernatequerydsl.TypeQuerySafe.X
 
 object PimpedSession {
 
@@ -33,16 +34,27 @@ object TypeUnsafe {
 }
 
 object TypeSafe {
-  implicit def string2Conditioner(field: String) = new StringConditioner(field)
+  implicit def anything2TypeSafeCondition(qq: Any) = new TypeSafeCriteriaCondition(Pig.tl.get)
+
+  implicit def criterion2Cond(crit:Criterion) = new CriterionCond(crit)
 }
 
-object TypeSafeCondition {
-  implicit def anything2TypeSafeCondition(qq: Any) = new TypeSafeCriteriaCondition(Pig.tl.get)
+object TypeQuerySafe {
+
+
+  implicit def anyToEq(qq:Any) = new X(Pig.tl.get)
+
+  class X(proxy:InvocationMemorizingCallback) {
+    val field = proxy.prefix + proxy.invokedPath
+    def equal(other:Any) = new EqCond(field, other)
+  }
 }
 
 class TypeSafeCriteriaCondition(proxy: InvocationMemorizingCallback) {
 
   val field = proxy.prefix + proxy.invokedPath
+
+  def equal(value: Any) = Restrictions.eq(field, value)
 
   def \==(value: Any) = Restrictions.eq(field, value)
 

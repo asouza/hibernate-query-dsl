@@ -6,7 +6,7 @@ import br.com.caelum.hibernatequerydsl.PimpedSession._
 import org.hibernate.Session
 import org.junit.{ Test, Before, After }
 import org.junit.Assert._
-import br.com.caelum.hibernatequerydsl.TypeSafeCondition._
+import br.com.caelum.hibernatequerydsl.TypeSafe._
 
 class PimpedClassTest {
 

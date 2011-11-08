@@ -3,7 +3,8 @@ package br.com.caelum.hibernatequerydsl
 import org.junit.Test
 import org.junit.Assert._
 import br.com.caelum.hibernatequerydsl.PimpedSession._
-import br.com.caelum.hibernatequerydsl.TypeSafe._
+import TypeSafe._
+
 class ActiveCollectionAcceptanceTest extends SessionBased {
 
   def ar = new ActiveCollection[User](null, session.from[User])
@@ -27,7 +28,7 @@ class ActiveCollectionAcceptanceTest extends SessionBased {
   @Test
   def shouldSupportParametersWithInt {
     withUser("guilherme", 20).and("alberto", 18)
-    val users = ar.filter(_.getAge equal 20)
+    val users = ar.filter(_.getAge \== 20)
     assertEquals("guilherme", users(0).getName)
     assertEquals(1, users.size)
   }

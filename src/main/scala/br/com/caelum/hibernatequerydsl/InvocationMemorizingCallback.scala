@@ -24,9 +24,17 @@ class InvocationMemorizingCallback(val prefix:String = "") extends InvocationHan
   private var _invoked: String = ""
   var properties = List[String]()
 
-  def invokedPath = properties.mkString(".")
+  def invokedPath = {
+    val path = properties.mkString(".")
+    properties = List()
+    path
+  }
 
-  def invoke(proxy: AnyRef, method: java.lang.reflect.Method, args: Array[AnyRef]) = {
+  def invoke(proxy: AnyRef, method: java.lang.reflect.Method, args: Array[AnyRef]):AnyRef = {
+    if (method.getDeclaringClass == classOf[Object]) {
+      return null
+    }
+
     _invoked = method.getName
     val GetterExpression = """(get|is)?(\w*){1}""".r
     _invoked match {
@@ -34,9 +42,7 @@ class InvocationMemorizingCallback(val prefix:String = "") extends InvocationHan
         properties = part2.withFirstCharLowered :: properties
       }
     }
-    val rest = if (_invoked.length() > 0) _invoked.substring(1,_invoked.length()) else ""
-    _invoked = Character.toLowerCase(_invoked.charAt(0)) + rest
-    if(method.getReturnType.getName.eq("boolean")) 
+    if(method.getReturnType.getName.eq("boolean"))
       new Boolean("false") 
     else if(method.getReturnType==Char.getClass) {
       ' '.asInstanceOf[AnyRef]

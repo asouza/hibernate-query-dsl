@@ -3,10 +3,11 @@ package br.com.caelum.hibernatequerydsl.conditions
 import net.sf.cglib.proxy.Enhancer
 import org.hibernate.criterion.{Criterion, Restrictions}
 import scala.collection.mutable.Map
+import br.com.caelum.hibernatequerydsl.InvocationMemorizingCallback
 
 object Cond {
   def applyRule[T](f: (T) => Cond)(implicit entityType:Manifest[T]):Cond = {
-    val handler = new ComparisonCallback
+    val handler = new InvocationMemorizingCallback
     val proxy = Enhancer.create(entityType.erasure, handler).asInstanceOf[T]
     f(proxy)
   }
@@ -17,6 +18,12 @@ trait Cond {
   def content(id:Int):String
   def params(id:Int):Map[String, Any]
   def ||(g:Cond) = new Or(this, g)
+}
+
+class CriterionCond(val crit:Criterion) extends Cond {
+  def content(id: Int) = ""
+
+  def params(id: Int) = Map()
 }
 
 /**
@@ -35,7 +42,6 @@ class EqCond(field:String, value:Any) extends Cond {
   def crit = Restrictions.eq(field, value)
   def content(id:Int) = field + " = :" + field + id
   def params(id:Int) = Map((field+id) -> value)
-
 }
 
 /**

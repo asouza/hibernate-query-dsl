@@ -2,7 +2,7 @@ package br.com.caelum.hibernatequerydsl
 
 import org.junit.Test
 import org.junit.Assert._
-import br.com.caelum.hibernatequerydsl.TypeSafe._
+import br.com.caelum.hibernatequerydsl.TypeQuerySafe._
 
 class TypeSafeQueryTest extends SessionBased{
 
