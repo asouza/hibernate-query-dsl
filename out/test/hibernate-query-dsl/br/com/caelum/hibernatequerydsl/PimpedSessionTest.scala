@@ -1,12 +1,16 @@
 package br.com.caelum.hibernatequerydsl
 
 import org.junit.Ignore
+import scala.reflect.BeanProperty
 import org.hibernate.cfg.Configuration
 import br.com.caelum.hibernatequerydsl.PimpedSession._
+import br.com.caelum.hibernatequerydsl.Expression._
 import org.hibernate.Session
+import org.hibernate.criterion.Order._
 import org.junit.{ Test, Before, After }
 import org.junit.Assert._
-import br.com.caelum.hibernatequerydsl.TypeSafeCondition._
+import scala.reflect.Code._
+import br.com.caelum.hibernatequerydsl.TypeUnsafe._
 
 class PimpedClassTest {
 
@@ -159,7 +163,7 @@ class PimpedClassTest {
     val alberto2 = newUser("alberto2", 20)
     val address = newAddress("rua da casa de nao sei quem", alberto)
     val address2 = newAddress("rua da casa de nao sei quem", alberto2)
-    val list = session.from[Address].join(_.getUser).where(_.getName \== ("alberto2")).where(_.getAge \== alberto2.getAge).asList[Address]
+    val list = session.from[Address].join(_.getUser).where(lift(addressToQuery.getUser.getName).equal("alberto2")).and(lift(addressToQuery.getUser.getAge).equal(alberto2.getAge)).asList[Address]
     assertEquals(1, list size)
   }
 
@@ -169,7 +173,7 @@ class PimpedClassTest {
     val alberto2 = newUser("alberto2", 20)
     val alberto3 = newUser("alberto3", 30)
     val alberto4 = newUser("alberto4", 40)
-    val list = session.from[User].where(_.getAge \> alberto.getAge).asList[User]
+    val list = session.from[User].where(lift(userToQuery.getAge) > alberto.getAge).asList[User]
     assertEquals(3, list size)
   }
 
@@ -179,7 +183,7 @@ class PimpedClassTest {
     val alberto2 = newUser("alberto2", 20)
     val alberto3 = newUser("alberto3", 30)
     val alberto4 = newUser("alberto4", 40)
-    var list = session.from[User].where(_.getAge \>= alberto.getAge).asList[User]
+    var list = session.from[User].where(lift(userToQuery.getAge) >= alberto.getAge).asList[User]
     assertEquals(4, list size)
   }
 
@@ -189,7 +193,7 @@ class PimpedClassTest {
     val alberto2 = newUser("alberto2", 20)
     val alberto3 = newUser("alberto3", 30)
     val alberto4 = newUser("alberto4", 40)
-    val list = session.from[User].where(_.getAge \< alberto2.getAge).asList[User]
+    val list = session.from[User].where(lift(userToQuery.getAge) < alberto2.getAge).asList[User]
     assertEquals(1, list size)
   }
 
@@ -199,7 +203,7 @@ class PimpedClassTest {
     val alberto2 = newUser("alberto2", 20)
     val alberto3 = newUser("alberto3", 30)
     val alberto4 = newUser("alberto4", 40)
-    val list = session.from[User].where(_.getAge \<= alberto2.getAge).asList[User]
+    val list = session.from[User].where(lift(userToQuery.getAge) <= alberto2.getAge).asList[User]
     assertEquals(2, list size)
   }
 
@@ -209,7 +213,7 @@ class PimpedClassTest {
     val alberto2 = newUser("alberto2", 20)
     val alberto3 = newUser("alberto3", 30)
     val alberto4 = newUser("outrute", 40)
-    val list = session.from[User].where(_.getAge \>= alberto2.getAge).where(_.getName like "alberto").asList[User]
+    val list = session.from[User].where(lift(userToQuery.getAge) >= alberto2.getAge).and(lift(userToQuery.getName) like "alberto").asList[User]
     assertEquals(2, list size)
   }
 
@@ -219,7 +223,7 @@ class PimpedClassTest {
     val alberto2 = newUser("alberto2", 20)
     val alberto3 = newUser("alberto3", 30)
     val alberto4 = newUser("outrute", 40)
-    val list = session.from[User].where(_.getName isNull).asList[User]
+    val list = session.from[User].where(lift(userToQuery.getName) isNull).asList[User]
     assertEquals(1, list size)
   }
 
@@ -229,7 +233,7 @@ class PimpedClassTest {
     val alberto2 = newUser("alberto2", 20)
     val alberto3 = newUser("alberto3", 30)
     val alberto4 = newUser("outrute", 40)
-    val list = session.from[User].where(_.getName isNotNull).asList[User]
+    val list = session.from[User].where(lift(userToQuery.getName) isNotNull).asList[User]
     assertEquals(3, list size)
   }
 
@@ -239,7 +243,7 @@ class PimpedClassTest {
     val alberto2 = newUser("alberto2", 20)
     val alberto3 = newUser("alberto3", 30)
     val alberto4 = newUser("alberto4", 40)
-    val list = session.from[User].where(_.getName \!= "alberto").asList[User]
+    val list = session.from[User].where("name" !== "alberto").asList[User]
     assertEquals(3, list size)
   }
 
@@ -273,7 +277,7 @@ class PimpedClassTest {
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
     val address4 = newAddress("y", alberto4)
-    val list = session.from[User].join(_.getAddresses).groupBy("addresses.street").asList[User]
+    val list = session.from[User].join(lift(userToQuery.getAddresses)).groupBy("addresses.street").asList[User]
     assertEquals(2, list size)
   }
 
@@ -287,7 +291,7 @@ class PimpedClassTest {
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
     val address4 = newAddress("y", alberto4)
-    val list = session.from[User].join(_.getAddresses).groupBy("addresses.street").avg[User](_.getAge).asList[Array[Object]]
+    val list = session.from[User].join(lift(userToQuery.getAddresses)).groupBy("addresses.street").avg(lift(userToQuery.getAge)).asList[Array[Object]]
     assertEquals(2, list size)
     assertEquals(15.0, list.head(1))
   }
@@ -302,7 +306,7 @@ class PimpedClassTest {
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
     val address4 = newAddress("y", alberto4)
-    val list = session.from[User].join(_.getAddresses).groupBy("addresses.street").sum[User](_.getAge).asList[Array[Object]]
+    val list = session.from[User].join(lift(userToQuery.getAddresses)).groupBy("addresses.street").sum(lift(userToQuery.getAge)).asList[Array[Object]]
     assertEquals(2, list size)
     assertEquals(30L, list.head(1))
   }
@@ -317,7 +321,7 @@ class PimpedClassTest {
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
     val address4 = newAddress("y", alberto4)
-    val list = session.from[User].join(_.getAddresses).groupBy("addresses.street").count[User](_.getAge).asList[Array[Object]]
+    val list = session.from[User].join(lift(userToQuery.getAddresses)).groupBy("addresses.street").count(lift(userToQuery.getAge)).asList[Array[Object]]
     assertEquals(2, list size)
     assertEquals(2L, list.head(1))
   }
@@ -332,7 +336,7 @@ class PimpedClassTest {
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
 
-    val list = session.from[User].where.has(_.getAddresses).asList[User]
+    val list = session.from[User].where.has(lift(userToQuery.getAddresses)).asList[User]
     assertEquals(3, list size)
   }
 
@@ -345,8 +349,8 @@ class PimpedClassTest {
     val address = newAddress("x", alberto)
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
-    import br.com.caelum.hibernatequerydsl.TypeUnsafe._
-    val list = session.from[User].includes(_.getAddresses).where("addresses.street" equal "y").asList[User]
+
+    val list = session.from[User].includes(lift(userToQuery.getAddresses)).where("addresses.street" equal "y").asList[User]
     assertEquals(1, list size)
   }
 
@@ -359,8 +363,7 @@ class PimpedClassTest {
     val address = newAddress("x", alberto)
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
-    import br.com.caelum.hibernatequerydsl.TypeUnsafe._
-    val list = session.from[User].includes(_.getAddresses).where("addresses.street" equal "y").asList[User]
+    val list = session.from[User].includes(lift(userToQuery.getAddresses)).where("addresses.street" equal "y").asList[User]
     assertEquals(1, list size)
   }
 
@@ -373,7 +376,7 @@ class PimpedClassTest {
     val address = newAddress("x", alberto)
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
-    val list = session.from[User].select("name").asList[String]
+    val list = session.from[User].select(lift(userToQuery.getName)).asList[String]
     assertEquals("alberto", list.head)
   }
 
@@ -383,7 +386,7 @@ class PimpedClassTest {
     val alberto2 = newUser("alberto", 20)
     val alberto3 = newUser("alberto", 15)
     val alberto4 = newUser("alberto4", 30)
-    val list = session.from[User].distinct(_.getName).asList[String]
+    val list = session.from[User].distinct("name").asList[String]
     assertEquals(2, list.size)
   }
 
@@ -397,7 +400,7 @@ class PimpedClassTest {
     val address = newAddress("x", alberto)
     val address2 = newAddress("x", alberto2)
     val address3 = newAddress("y", alberto3)
-    val list = session.from[User].join(_.getAddresses).select("name").selectWithAliases("addresses.street".alias("street")).transformToBean[StreetWithName].asList
+    val list = session.from[User].join(lift(userToQuery.getAddresses)).select(lift(userToQuery.getName)).selectWithAliases("addresses.street".alias("street")).transformToBean[StreetWithName].asList
     assertEquals("alberto", list.head.getName)
   }
 }

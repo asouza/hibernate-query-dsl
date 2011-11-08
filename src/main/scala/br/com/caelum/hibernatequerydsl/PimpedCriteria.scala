@@ -4,7 +4,7 @@ import org.hibernate.criterion._
 import org.hibernate.criterion.Projections._
 import org.hibernate.impl.CriteriaImpl
 import org.hibernate.transform.Transformers
-import org.hibernate.{Session, Criteria}
+import org.hibernate.{ Session, Criteria }
 import net.sf.cglib.proxy.Enhancer
 import scala.collection.JavaConversions._
 
@@ -12,11 +12,11 @@ import scala.collection.JavaConversions._
  * A criteria that will query on objects of type T, projecting
  * on type P. This criteria is backed by a hibernate criteria.
  */
-class PimpedCriteria[T,P](prefix:String, val criteria: Criteria) {
+class PimpedCriteria[T, P](prefix: String, val criteria: Criteria) {
 
   import PimpedSession._
-  type Myself = PimpedCriteria[T,P]
-  implicit def criteriaToPimped(partial:Criteria) = new PimpedCriteria[T,P](prefix, partial)
+  type Myself = PimpedCriteria[T, P]
+  implicit def criteriaToPimped(partial: Criteria) = new PimpedCriteria[T, P](prefix, partial)
 
   val projections = projectionList
   val criteriaImpl = criteria.asInstanceOf[CriteriaImpl]
@@ -29,54 +29,71 @@ class PimpedCriteria[T,P](prefix:String, val criteria: Criteria) {
 
   def asList[Y]: List[Y] = criteria.list.asInstanceOf[java.util.List[Y]].toList
 
-  def using(f:(Criteria) => Criteria):Myself = f(criteria)
+  def using(f: (Criteria) => Criteria): Myself = f(criteria)
 
-  def list:List[P] = asList[P]
+  def list: List[P] = asList[P]
 
-  def orderBy(order: Order):Myself = criteria.addOrder(order)
+  def orderBy(order: Order): Myself = criteria.addOrder(order)
 
   // TODO use only one class per entity
-	def orderBy(f:(T) => Unit)(implicit entityType:Manifest[T]) = {
-    val path = evaluate(f)
-		new OrderThis[T,P](prefix + path, this)
-	}
-
-  def orderBy2[Proj](f:(Proj) => Unit)(implicit manifest:Manifest[Proj]) = {
-    val path = evaluate(f)
-		new OrderThis[T,Proj](path, new PimpedCriteria[T,Proj]("", criteria))
+  def orderBy(f: (T) => Unit)(implicit entityType: Manifest[T]) = {
+    val path = evaluate(f).invokedPath
+    new OrderThis[T, P](prefix + path, this)
   }
 
-  def headOption:Option[P] = using(_.setMaxResults(1)).list.toList.asInstanceOf[List[P]].headOption
+  def orderBy2[Proj](f: (Proj) => Unit)(implicit manifest: Manifest[Proj]) = {
+    val path = evaluate(f).invokedPath
+    new OrderThis[T, Proj](path, new PimpedCriteria[T, Proj]("", criteria))
+  }
 
-  def join(field: String):Myself = criteria.createAlias(field, field)
+  def headOption: Option[P] = using(_.setMaxResults(1)).list.toList.asInstanceOf[List[P]].headOption
 
-  def join[Joiner](f:(T) => Joiner)(implicit entityType:Manifest[T]) = {
-    val field = evaluate(f)
+  def join(field: String): Myself = criteria.createAlias(field, field)
+
+  def join[Joiner](f: (T) => Joiner)(implicit entityType: Manifest[T]) = {
+    val field = evaluate(f).invokedPath
     new PimpedCriteria[Joiner, P](prefix + field + ".", criteria.createAlias(field, field))
   }
 
-  private def evaluate[K,X](f:(K) => X)(implicit entityType:Manifest[K]):String = {
+  private def evaluate[K, X](f: (K) => X)(implicit entityType: Manifest[K]): InvocationMemorizingCallback = {
     val handler = new InvocationMemorizingCallback
     val proxy = Enhancer.create(entityType.erasure, handler).asInstanceOf[K]
     f(proxy)
-    handler.invokedPath
+    handler
   }
 
-  def has(toManyField: String):Myself = {
+  def has(toManyField: String): Myself = {
     criteria.add(Restrictions.isNotEmpty(toManyField))
   }
 
-  def includes(toManyField: String):Myself = {
+  def has(f: (T) => Unit)(implicit entityType: Manifest[T]): Myself = {
+    criteria.add(Restrictions.isNotEmpty(evaluate(f).invokedPath))
+  }
+
+  def includes(toManyField: String): Myself = {
     join(toManyField).has(toManyField)
   }
 
-  def where(condition: Criterion):Myself = {
+  def includes(f: (T) => Unit)(implicit entityType: Manifest[T]): Myself = {
+    val field = evaluate(f).invokedPath
+    join(field).has(field)
+  }
+
+  def where(condition: Criterion): Myself = {
     criteria.add(condition)
   }
 
-  def where:Myself = { this }
+  def where: Myself = { this }
 
-  def and(condition: Criterion):Myself = {
+  def where(f: (T) => Criterion)(implicit entityType: Manifest[T]): Myself = {
+    val handler = new InvocationMemorizingCallback(prefix)
+    val proxy = Enhancer.create(entityType.erasure, handler).asInstanceOf[T]
+    val condition = f(proxy)
+    //println(condition)
+    criteria.add(condition)
+  }
+
+  def and(condition: Criterion): Myself = {
     criteria.add(condition)
   }
 
@@ -90,46 +107,68 @@ class PimpedCriteria[T,P](prefix:String, val criteria: Criteria) {
     criteria.setFirstResult(size.intValue - 1).unique[Y]
   }
 
-  def groupBy(fields: String*):Myself = {
+  def groupBy(fields: String*): Myself = {
     fields.foreach(field => {
       projections.add(Projections.groupProperty(field))
     })
     criteria.setProjection(projections)
   }
 
-  def select(fields: String*):Myself = {
+  def select(fields: String*): Myself = {
     fields.foreach(field => {
       projections.add(Projections.property(field))
     })
     criteria.setProjection(projections)
   }
 
-  def selectWithAliases(fields: Projection*):Myself = {
+  def selectWithAliases(fields: Projection*): Myself = {
     fields.foreach(projections.add(_))
     criteria.setProjection(projections)
   }
 
-  def avg(field: String):Myself = {
+  def avg(field: String): Myself = {
     projections.add(Projections.avg(field))
     criteria.setProjection(projections)
   }
 
-  def sum(field: String):Myself = {
+  def avg[Proj](f: (Proj) => Unit)(implicit entityType: Manifest[Proj]): Myself = {
+    avg(evaluate(f).invokedPath)
+  }
+
+  def sum(field: String): Myself = {
     projections.add(Projections.sum(field))
     criteria.setProjection(projections)
   }
 
-  def count(field: String):Myself = {
+  def sum[Proj](f: (Proj) => Unit)(implicit entityType: Manifest[Proj]): Myself = {
+    sum(evaluate(f).invokedPath)
+  }
+
+  def count(field: String): Myself = {
     projections.add(Projections.count(field))
     criteria.setProjection(projections)
   }
-  
-  def distinct(field:String):Myself = {
+
+  def count[Proj](f: (Proj) => Unit)(implicit entityType: Manifest[Proj]): Myself = {
+    count(evaluate(f).invokedPath)
+  }
+
+  def distinct(field: String): Myself = {
     projections.add(Projections.distinct(Projections.property(field)))
     criteria.setProjection(projections)
   }
 
+  def distinct2[Proj](f: (Proj) => Unit)(implicit entityType: Manifest[Proj]): Myself = {
+    distinct(evaluate(f).invokedPath)
+  }
+
+ def distinct(f: (T) => Unit)(implicit entityType: Manifest[T]): Myself = {
+    distinct(evaluate(f).invokedPath)
+  }
+
+  
+
   def transformToBean[Y](implicit manifest: Manifest[Y]) = {
-    new Transformer[Y,P](criteria.setResultTransformer(Transformers.aliasToBean(manifest.erasure)))
+    new Transformer[Y, P](criteria.setResultTransformer(Transformers.aliasToBean(manifest.erasure)))
   }
 }
