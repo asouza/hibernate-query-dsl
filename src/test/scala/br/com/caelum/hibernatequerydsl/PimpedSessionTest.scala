@@ -8,6 +8,7 @@ import org.junit.{ Test, Before, After }
 import org.junit.Assert._
 import scala.reflect.Code._
 import br.com.caelum.hibernatequerydsl.TypeUnsafe._
+import org.hibernate.criterion.Restrictions
 
 class PimpedClassTest {
 
@@ -47,6 +48,7 @@ class PimpedClassTest {
     address setStreet street
     address setUser user
     session.save(address)
+
     address
   }
 
