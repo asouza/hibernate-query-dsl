@@ -75,9 +75,13 @@ class ActiveCollectionAcceptanceTest extends SessionBased {
 
   @Test
   def shouldSupportForExpressions {
-    withUser("guilherme").and("alberto")
+    withUser("guilherme", 20).and("alberto", 30).and("alberto", 20)
 
-    val users = for (u <- ar if u.getName equal "alberto") yield u
+    val users = for {
+      u <- ar
+      if u.getName equal "alberto"
+      if u.getAge \< 21
+    } yield u
 
     assertEquals(1, users.size)
   }
