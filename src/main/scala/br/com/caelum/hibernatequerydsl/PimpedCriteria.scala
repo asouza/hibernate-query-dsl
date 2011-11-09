@@ -93,9 +93,9 @@ class PimpedCriteria[T, P](prefix: String, val criteria: Criteria) {
     criteria.add(condition)
   }
 
-  def and(condition: Criterion): Myself = {
-    criteria.add(condition)
-  }
+  def and(condition: Criterion): Myself = where(condition)
+
+  def and(f: (T) => Criterion)(implicit entityType: Manifest[T]): Myself = where(f)
 
   def count = criteria.setProjection(rowCount).uniqueResult.asInstanceOf[Long].intValue
 

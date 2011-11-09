@@ -67,4 +67,15 @@ class ActiveCollection[T](var elements:List[T], query:PimpedCriteria[T,T])(impli
 
     new ActiveCollection[B](null, query.asInstanceOf[PimpedCriteria[B,B]])
   }
+  def flatMap[B](f: T => Seq[B])(implicit m:Manifest[B]):ActiveCollection[B] = {
+    val handler = new InvocationMemorizingCallback
+    val proxy = Enhancer.create(entityType.erasure, handler).asInstanceOf[T]
+    f(proxy)
+
+    val field = handler.invokedPath
+    if (!field.isEmpty)
+      query.select(field)
+
+    new ActiveCollection[B](null, query.asInstanceOf[PimpedCriteria[B,B]])
+  }
 }
