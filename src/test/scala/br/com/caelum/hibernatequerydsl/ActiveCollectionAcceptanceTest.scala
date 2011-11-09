@@ -80,10 +80,33 @@ class ActiveCollectionAcceptanceTest extends SessionBased {
     val users = for {
       u <- ar
       if u.getName equal "alberto"
+    } yield u
+
+    assertEquals(2, users.size)
+  }
+
+  @Test
+  def shouldSupportForExpressionsWithSeveralFilters {
+    withUser("guilherme", 20).and("alberto", 30).and("alberto", 20)
+
+    val users = for {
+      u <- ar
+      if u.getName equal "alberto"
       if u.getAge \< 21
     } yield u
 
     assertEquals(1, users.size)
+  }
+  @Test
+  def shouldSupportForExpressionsWithSelect {
+    withUser("guilherme", 20).and("alberto", 30).and("alberto", 20)
+
+    val userNames = for {
+      u <- ar
+      if u.getAge \< 21
+    } yield u.getName
+
+    assertEquals(List("guilherme", "alberto"), userNames.grabThem)
   }
 
 }

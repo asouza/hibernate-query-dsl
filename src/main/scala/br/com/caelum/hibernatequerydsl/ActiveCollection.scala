@@ -2,6 +2,7 @@ package br.com.caelum.hibernatequerydsl
 
 import conditions.Cond
 import org.hibernate.criterion.Restrictions
+import net.sf.cglib.proxy.Enhancer
 
 class ActiveCollection[T](var elements:List[T], query:PimpedCriteria[T,T])(implicit entityType:Manifest[T]) {
 
@@ -56,6 +57,14 @@ class ActiveCollection[T](var elements:List[T], query:PimpedCriteria[T,T])(impli
 
 
   def map[B](f: T => B)(implicit m:Manifest[B]):ActiveCollection[B] = {
+    val handler = new InvocationMemorizingCallback
+    val proxy = Enhancer.create(entityType.erasure, handler).asInstanceOf[T]
+    f(proxy)
+
+    val field = handler.invokedPath
+    if (!field.isEmpty)
+      query.select(field)
+
     new ActiveCollection[B](null, query.asInstanceOf[PimpedCriteria[B,B]])
   }
 }
