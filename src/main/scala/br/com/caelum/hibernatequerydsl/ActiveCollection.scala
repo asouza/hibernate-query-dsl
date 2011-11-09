@@ -38,6 +38,8 @@ class ActiveCollection[T](var elements:List[T], query:PimpedCriteria[T,T])(impli
     query.and(applyRule(f).crit)
   }
 
+  def withFilter(f: Condition):Myself = filter(f)
+
   def filterNot(f: Condition):Myself = query.and(Restrictions.not(applyRule(f).crit))
 
   def find(f: Condition): Option[T] = {
@@ -52,4 +54,8 @@ class ActiveCollection[T](var elements:List[T], query:PimpedCriteria[T,T])(impli
   def head = query.headOption.get
   def tail:List[T] = drop(1).grabThem
 
+
+  def map[B](f: T => B)(implicit m:Manifest[B]):ActiveCollection[B] = {
+    new ActiveCollection[B](null, query.asInstanceOf[PimpedCriteria[B,B]])
+  }
 }
