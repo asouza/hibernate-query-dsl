@@ -1,9 +1,11 @@
 package br.com.caelum.hibernatequerydsl
 
-import org.hibernate.{Criteria, Session, Query}
-import org.hibernate.criterion.{Order, Restrictions, MatchMode, Projections}
-
+import conditions.{EqCond, CriterionCond}
+import org.hibernate.{ Session, Query }
+import scala.reflect.{Apply, Select, Literal, Tree,Code,This }
 import java.io.Serializable
+import org.hibernate.criterion._
+import br.com.caelum.hibernatequerydsl.TypeQuerySafe.X
 
 object PimpedSession {
 
@@ -15,9 +17,15 @@ object PimpedSession {
 
   implicit def orderThisToPimped[T, P](order: OrderThis[T, P]) = order.asc
 
-  implicit def collectionToActive[T](elements: List[T], criteria: PimpedCriteria[T, T])(implicit t: Manifest[T]) = new ActiveCollection[T](elements, criteria)
+  implicit def criteriaToActive[T](criteria:PimpedCriteria[T,T])(implicit t:Manifest[T]) = new ActiveCollection[T](null, criteria)
 
   implicit def acToList[T](ac: ActiveCollection[T]) = ac.grabThem
+
+  implicit def queryToList[T](query:TypeSafeQuery[T]) = query.list
+
+  implicit def sessionToQueriable(session: Session) = new {
+    def query[T](implicit manifest:Manifest[T]) = new TypeSafeQuery[T](session)(manifest)
+  }
 
 }
 
@@ -26,16 +34,27 @@ object TypeUnsafe {
 }
 
 object TypeSafe {
-  implicit def string2Conditioner(field: String) = new StringConditioner(field)
+  implicit def anything2TypeSafeCondition(qq: Any) = new TypeSafeCriteriaCondition(Pig.tl.get)
+
+  implicit def criterion2Cond(crit:Criterion) = new CriterionCond(crit)
 }
 
-object TypeSafeCondition {
-  implicit def anything2TypeSafeCondition(qq: Any) = new TypeSafeCriteriaCondition(Pig.tl.get)
+object TypeQuerySafe {
+
+
+  implicit def anyToEq(qq:Any) = new X(Pig.tl.get)
+
+  class X(proxy:InvocationMemorizingCallback) {
+    val field = proxy.prefix + proxy.invokedPath
+    def equal(other:Any) = new EqCond(field, other)
+  }
 }
 
 class TypeSafeCriteriaCondition(proxy: InvocationMemorizingCallback) {
 
   val field = proxy.prefix + proxy.invokedPath
+
+  def equal(value: Any) = Restrictions.eq(field, value)
 
   def \==(value: Any) = Restrictions.eq(field, value)
 
@@ -57,7 +76,6 @@ class TypeSafeCriteriaCondition(proxy: InvocationMemorizingCallback) {
 
   def alias(newName: String) = Projections.property(field).as(newName)
 }
-
 
 class PimpedStringCondition(field: String) {
   def equal(value: Any) = Restrictions.eq(field, value)
@@ -84,10 +102,6 @@ class PimpedStringCondition(field: String) {
 
   def alias(newName: String) = Projections.property(field).as(newName)
 
-}
-
-class StringConditioner(field: String) {
-  def equal(value: Any) = new EqCond(field, value)
 }
 
 class PimpedSession(session: Session) {

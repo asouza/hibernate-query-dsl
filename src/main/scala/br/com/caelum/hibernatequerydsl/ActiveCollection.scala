@@ -1,18 +1,12 @@
 package br.com.caelum.hibernatequerydsl
 
-import scala.collection.JavaConversions._
+import conditions.Cond
+import org.hibernate.criterion.Restrictions
 import net.sf.cglib.proxy.Enhancer
-import org.hibernate.criterion.{Criterion, Restrictions}
-
-trait Cond {
-  def crit:Criterion
-}
-class EqCond(field:String, value:Any) extends Cond {
-  def crit = Restrictions.eq(field, value)
-}
 
 class ActiveCollection[T](var elements:List[T], query:PimpedCriteria[T,T])(implicit entityType:Manifest[T]) {
 
+  import Cond.applyRule
   private type Myself = ActiveCollection[T]
   private type Condition = (T) => Cond
   private def loaded = Option(elements).isDefined
@@ -39,22 +33,49 @@ class ActiveCollection[T](var elements:List[T], query:PimpedCriteria[T,T])(impli
     grabThem.dropWhile(f)
   }
 
-  def exists(f: Condition):Boolean = {
-    find(f).isDefined
-  }
+  def exists(f: Condition) = find(f).isDefined
 
   def filter(f: Condition):Myself = {
     query.and(applyRule(f).crit)
   }
 
+  def withFilter(f: Condition):Myself = filter(f)
+
+  def filterNot(f: Condition):Myself = query.and(Restrictions.not(applyRule(f).crit))
+
   def find(f: Condition): Option[T] = {
     query.and(applyRule(f).crit).using(_.setMaxResults(1)).headOption
   }
 
-  def applyRule(f: Condition):Cond = {
-    val handler = new ComparisonCallback
-    val proxy = Enhancer.create(entityType.erasure, handler).asInstanceOf[T]
-    f(proxy)
+  def count(f: Condition) = {
+    filter(f)
+    query.count
   }
 
+  def head = query.headOption.get
+  def tail:List[T] = drop(1).grabThem
+
+
+  def map[B](f: T => B)(implicit m:Manifest[B]):ActiveCollection[B] = {
+    val handler = new InvocationMemorizingCallback
+    val proxy = Enhancer.create(entityType.erasure, handler).asInstanceOf[T]
+    f(proxy)
+
+    val field = handler.invokedPath
+    if (!field.isEmpty)
+      query.select(field)
+
+    new ActiveCollection[B](null, query.asInstanceOf[PimpedCriteria[B,B]])
+  }
+  def flatMap[B](f: T => Seq[B])(implicit m:Manifest[B]):ActiveCollection[B] = {
+    val handler = new InvocationMemorizingCallback
+    val proxy = Enhancer.create(entityType.erasure, handler).asInstanceOf[T]
+    f(proxy)
+
+    val field = handler.invokedPath
+    if (!field.isEmpty)
+      query.select(field)
+
+    new ActiveCollection[B](null, query.asInstanceOf[PimpedCriteria[B,B]])
+  }
 }

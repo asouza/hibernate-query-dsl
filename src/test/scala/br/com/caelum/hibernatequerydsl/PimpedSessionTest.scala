@@ -1,15 +1,12 @@
 package br.com.caelum.hibernatequerydsl
 
 import org.junit.Ignore
-import scala.reflect.BeanProperty
 import org.hibernate.cfg.Configuration
 import br.com.caelum.hibernatequerydsl.PimpedSession._
-import br.com.caelum.hibernatequerydsl.Expression._
 import org.hibernate.Session
-import org.hibernate.criterion.Order._
 import org.junit.{ Test, Before, After }
 import org.junit.Assert._
-import br.com.caelum.hibernatequerydsl.TypeSafeCondition._
+import br.com.caelum.hibernatequerydsl.TypeSafe._
 
 class PimpedClassTest {
 

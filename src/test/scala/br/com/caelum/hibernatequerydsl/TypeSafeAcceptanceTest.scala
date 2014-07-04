@@ -6,41 +6,7 @@ import org.junit.{Test, After, Before}
 import org.junit.Assert._
 import br.com.caelum.hibernatequerydsl.PimpedSession._
 import br.com.caelum.hibernatequerydsl.TypeUnsafe._
-class TypeSafeAcceptanceTest {
-
-  private var session:Session = _
-
-  @Before
-  def setUp {
-    val cfg = new Configuration();
-    session = cfg.configure().buildSessionFactory().openSession();
-    session.beginTransaction();
-  }
-
-  @After
-  def tearDown{
-    if (session != null && session.getTransaction().isActive()) {
-      session.getTransaction().rollback();
-    }
-  }
-
-  private def withUser(name:String=null,age:Int=0, street:String=null) = {
-    val user = new User
-    user setName name
-    user setAge  age
-    session.save(user)
-    if(street!=null){
-      val address = new Address
-      address setStreet street
-      address setUser  user
-      session.save(address)
-    }
-    this
-  }
-
-  private def and(name:String=null,age:Int=0, street:String=null) = {
-    withUser(name, age, street)
-  }
+class TypeSafeAcceptanceTest extends SessionBased {
 
   @Test
   def shouldListAllObjects {

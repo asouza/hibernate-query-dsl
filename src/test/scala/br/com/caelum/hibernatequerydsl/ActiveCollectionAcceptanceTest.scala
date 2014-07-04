@@ -1,46 +1,11 @@
 package br.com.caelum.hibernatequerydsl
 
-import org.hibernate.Session
-import org.hibernate.cfg.Configuration
-import org.junit.{Test, After, Before}
+import org.junit.Test
 import org.junit.Assert._
 import br.com.caelum.hibernatequerydsl.PimpedSession._
-import br.com.caelum.hibernatequerydsl.TypeSafe._
-class ActiveCollectionAcceptanceTest {
+import TypeSafe._
 
-  private var session:Session = _
-
-  @Before
-  def setUp {
-    val cfg = new Configuration();
-    session = cfg.configure().buildSessionFactory().openSession();
-    session.beginTransaction();
-  }
-
-  @After
-  def tearDown{
-    if (session != null && session.getTransaction().isActive()) {
-      session.getTransaction().rollback();
-    }
-  }
-
-  private def withUser(name:String=null,age:Int=0, street:String=null) = {
-    val user = new User
-    user setName name
-    user setAge  age
-    session.save(user)
-    if(street!=null){
-      val address = new Address
-      address setStreet street
-      address setUser  user
-      session.save(address)
-    }
-    this
-  }
-
-  private def and(name:String=null,age:Int=0, street:String=null) = {
-    withUser(name, age, street)
-  }
+class ActiveCollectionAcceptanceTest extends SessionBased {
 
   def ar = new ActiveCollection[User](null, session.from[User])
 
@@ -49,7 +14,7 @@ class ActiveCollectionAcceptanceTest {
     withUser("guilherme").and("alberto")
     val users = ar.take(1)
     assertEquals("guilherme", users(0).getName)
-    assertEquals(1, users.size)
+    assertEquals(1, users.toList.size)
   }
 
   @Test
@@ -57,6 +22,14 @@ class ActiveCollectionAcceptanceTest {
     withUser("guilherme").and("alberto")
     val users = ar.filter(_.getName equal "alberto").take(1)
     assertEquals("alberto", users(0).getName)
+    assertEquals(1, users.size)
+  }
+
+  @Test
+  def shouldSupportParametersWithInt {
+    withUser("guilherme", 20).and("alberto", 18)
+    val users = ar.filter(_.getAge \== 20)
+    assertEquals("guilherme", users(0).getName)
     assertEquals(1, users.size)
   }
 
@@ -98,6 +71,42 @@ class ActiveCollectionAcceptanceTest {
     assertEquals(2, users.size)
     assertEquals(classOf[ActiveCollection[User]], ar.getClass)
     assertEquals(1, users.take(1).size)
+  }
+
+  @Test
+  def shouldSupportForExpressions {
+    withUser("guilherme", 20).and("alberto", 30).and("alberto", 20)
+
+    val users = for {
+      u <- ar
+      if u.getName equal "alberto"
+    } yield u
+
+    assertEquals(2, users.size)
+  }
+
+  @Test
+  def shouldSupportForExpressionsWithSeveralFilters {
+    withUser("guilherme", 20).and("alberto", 30).and("alberto", 20)
+
+    val users = for {
+      u <- ar
+      if u.getName equal "alberto"
+      if u.getAge \< 21
+    } yield u
+
+    assertEquals(1, users.size)
+  }
+  @Test
+  def shouldSupportForExpressionsWithSelect {
+    withUser("guilherme", 20).and("alberto", 30).and("alberto", 20)
+
+    val userNames = for {
+      u <- ar
+      if u.getAge \< 21
+    } yield u.getName
+
+    assertEquals(List("guilherme", "alberto"), userNames.grabThem)
   }
 
 }
